@@ -1,17 +1,10 @@
 {
     "yuki": [
         {
-            "url": "https://admin.mirrors.ustc.edu.cn/mirrors2",
+            "url": "https://mirrors.ustc.edu.cn/status/json",
             "name": "mirrors2",
             "priority": 1,
             "homepage": true,
-            "mirrorz": true
-        },
-        {
-            "url": "https://admin.mirrors.ustc.edu.cn/api/v1/metas",
-            "name": "mirrors4",
-            "priority": 2,
-            "homepage": false,
             "mirrorz": true
         }
     ],

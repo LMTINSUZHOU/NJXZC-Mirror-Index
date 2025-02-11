@@ -7,14 +7,14 @@ CONFIG = {
         "main_page": True,
         "grafana": True,
         "title": "Sync Status",
-        "endpoint": "https://admin.mirrors.ustc.edu.cn/api/v1/metas"
+        "endpoint": "/status/json"
     },
-    "mirrors2.html": {
-        "main_page": False,
-        "grafana": False,
-        "title": "Mirrors2 Sync Status",
-        "endpoint": "https://admin.mirrors.ustc.edu.cn/mirrors2"
-    },
+#    "mirrors2.html": {
+#        "main_page": False,
+#        "grafana": False,
+#        "title": "Mirrors2 Sync Status",
+#        "endpoint": "https://admin.mirrors.ustc.edu.cn/mirrors2"
+#    },
 }
 
 def main():
