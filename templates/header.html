@@ -1,16 +1,19 @@
 <div id="header">
     <ul id="headlinks">
-        <li><a href="/status/" target="_blank">Status</a></li>
-        <li><a href="https://servers.ustclug.org/" target="_blank">News</a></li>
-        <li><a href="/help/" target="_blank">Help</a></li>
-        <li><a href="https://lug.ustc.edu.cn" target="_blank">About</a></li>
+        <li><a href="{{ site["status-url"] }}" target="_blank">Status</a></li>
+        {% if site["news-url"] %}<li><a href="{{ site["news-url"] }}" target="_blank">News</a></li>{% endif %}
+        <li><a href="{{ site["help-url"] }}" target="_blank">Help</a></li>
+        <li><a href="{{ site["about-url"] }}" target="_blank">About</a></li>
     </ul>
 </div>
 <div id="welcome">
     <div id="intro">
-        <h1 id="infinity">Another infinity</h1>
-        <h2>Welcome to USTC open source software mirror.</h2>
-        <p>Brought to you by University of Science and Technology of China and USTCLUG.</p>
+        <div id="brandline">
+            <img src="/static/img/njxzu-mirrors.svg" alt="{{ site.brand }}">
+            <h1 id="infinity">{{ site["hero-title"] }}</h1>
+        </div>
+        <h2>{{ site["hero-subtitle"] }}</h2>
+        <p>{{ site["hero-description"] }}</p>
         <br>
     </div>
 </div>

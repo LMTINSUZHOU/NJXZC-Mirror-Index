@@ -76,4 +76,7 @@ def get_mirrorz_cname():
 def get_isolist():
     genisolist_inifile = CONFIG_FOLDER / "genisolist.ini"
     sections = process_ini(genisolist_inifile)
+    httpdir = os.getenv("MIRROR_HTTPDIR")
+    if httpdir:
+        sections.setdefault("%main%", {})["root"] = httpdir
     return gen_from_sections(sections)

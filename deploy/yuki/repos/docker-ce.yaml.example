@@ -1,0 +1,13 @@
+name: docker-ce
+cron: "27 */4 * * *"
+storageDir: /srv/mirror/www/docker-ce
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: rsync.mirrors.ustc.edu.cn
+  RSYNC_PATH: docker-ce/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_EXTRA: --size-only
+  RSYNC_MAXDELETE: "50000"
+  $UPSTREAM: rsync://rsync.mirrors.ustc.edu.cn/docker-ce/

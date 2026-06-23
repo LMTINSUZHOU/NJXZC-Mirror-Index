@@ -5,7 +5,10 @@ After=network.target
 [Service]
 Type=oneshot
 User=mirror
-ExecStart=/usr/bin/python3 /home/mirror/scripts/newindex/genindex.py
+Group=mirror
+EnvironmentFile=-/etc/njxzu-mirrors.env
+WorkingDirectory=/opt/njxzu-mirrors-index
+ExecStart=/opt/njxzu-mirrors-index/scripts/generate-index.sh
 
 [Install]
 WantedBy=multi-user.target

@@ -22,8 +22,8 @@ def main():
         or gencontent.HTTPDIR
     )
     parser = argparse.ArgumentParser(
-        description="USTC Mirrors Index Page Generator",
-        epilog="Brought to you by LUG@USTC.",
+        description="Mirrors index page generator",
+        epilog="Brought to you by NJXZU Mirrors.",
     )
     parser.add_argument(
         "-d",
@@ -71,11 +71,13 @@ def main():
     logger.debug("begin parsing template...")
 
     repolist = list(gencontent.genRepoList())
-    revproxy = gencontent.getOthers()
+    revproxy = list(gencontent.getOthers())
     isoinfo = get_isolist()
-    newslist = genservernews.getServerNews(logger)
+    site = gencontent.SITE_CONFIG
+    newslist = genservernews.getServerNews(logger, feed=site.get("news-feed", ""))
 
     parsed_template = template.render(
+        site=site,
         repolist=repolist,
         revproxy=revproxy,
         isoinfo=isoinfo,

@@ -1,0 +1,19 @@
+[Unit]
+Description=Yuki mirror sync daemon
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+ConditionPathExists=/etc/yuki/daemon.toml
+
+[Service]
+Type=simple
+User=mirror
+Group=mirror
+ExecStart=/usr/local/bin/yukid
+ExecReload=/usr/local/bin/yukictl reload
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+Alias=yuki.service

@@ -1,0 +1,9 @@
+db_url = "/var/lib/yuki/yukid.db"
+repo_config_dir = ["/etc/yuki/repos"]
+repo_logs_dir = "/var/log/yuki"
+fs = "default"
+listen_addr = "127.0.0.1:9999"
+log_level = "info"
+sync_timeout = "48h"
+images_upgrade_interval = "6h"
+post_sync = ["/opt/njxzu-mirrors-index/scripts/post-sync-regenerate.sh"]

@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>USTC Open Source Software Mirror</title>
+    <title>{{ site.title }}</title>
     <link href="/static/css/fonts.css" rel="stylesheet" type="text/css">
-    <link rel="shortcut icon" type="image/png" href="/static/img/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
 {% include 'style.html' %}
 </head>
 <body>
@@ -14,6 +14,7 @@
 <div id="wrapper">
     <div id="filelist">
         <!--FIXME: kind of ugly :(-->
+        {% if revproxy %}
         <div style="overflow:hidden">
             <input id="revproxy" type="checkbox"/>
             <h3>
@@ -35,6 +36,7 @@
                 </table>
             </div>
         </div>
+        {% endif %}
         <div>
             <h3 id="filetitle">文件列表</h3>
             <input placeholder="按 S 过滤" id="search" type="search" autocomplete="off"/>

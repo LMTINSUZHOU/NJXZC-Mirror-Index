@@ -1,102 +1,127 @@
-# mirrors-index
+# 南京晓庄学院开源软件镜像站
 
-Help documentation source code: https://github.com/ustclug/mirrorhelp/
+本项目基于 [USTC mirrors-index](https://git.lug.ustc.edu.cn/mirrors/mirrors-index) 定制，用于生成南京晓庄学院开源软件镜像站首页、状态页和 MirrorZ 元数据。同步调度参考 [ustclug/yuki](https://github.com/ustclug/yuki)，同步容器参考 [ustclug/ustcmirror-images](https://github.com/ustclug/ustcmirror-images)，页面体验参考 <https://mirrors.ustc.edu.cn/>。
 
-## Dependencies
+完整安装、rsync 同步配置和运维手册见 [docs/INSTALL_AND_MANUAL.md](docs/INSTALL_AND_MANUAL.md)。
 
-* python3
-* python3-requests
-* python3-jinja2
-* systemd (optional)
+## 组件
 
-## Install
+- `mirrors-index`：扫描镜像目录，生成 `index.html`、`mirrorz.json`、`/status/` 静态页面。
+- `yuki`：可选的镜像同步调度器，提供 `/api/v1/metas` 状态 JSON。
+- `ustcmirror-images`：可选的同步容器集合，例如 `ustcmirror/rsync:latest`、`ustcmirror/apt-sync:latest`。
+- `nginx`：对外提供静态文件、仓库目录浏览，并把 `/status/json` 反代到 yuki。
 
-genisolist is a submodule of mirrorz-genisolist, so please checkout the submodule first:
+## 容器化部署
 
-```shell
-git submodule update --init --recursive
+推荐部署形态是：`yuki` 继续运行在宿主机，`web` 与 `index` 使用容器运行。这样 yuki 仍可直接管理 Docker 同步容器和宿主机目录，Web 层也更容易升级和回滚。
+
+目标系统建议 Debian 12 或 Ubuntu 22.04/24.04。
+
+```bash
+git clone --recursive <this-repo> /tmp/njxzu-mirrors-index
+cd /tmp/njxzu-mirrors-index
+sudo deploy/install.sh \
+  --domain mirrors.njxzc.edu.cn \
+  --email mirror-admin@njxzc.edu.cn \
+  --web-root /srv/mirror/www
 ```
 
-Assuming that your metadata is stored in `/srv/rsync-attrs`. Otherwise, you should modify the `HTTPDIR` variable in gencontent.py (by gencontent.json), and root attribute in genisolist.ini.
+容器化部署会启动两个服务：
 
-Metadata now is generated from rsync-huai hook after every sync by yuki.
+- `web`：官方 `nginx:1.27-alpine`，读取 `/srv/mirror/www` 并对外监听 80。
+- `index`：本项目构建的 Python 镜像，默认每 10 分钟生成一次 `index.html` 和 `mirrorz.json`。
 
-### Current Method
+`deploy/compose.yaml` 默认使用 `network_mode: host`。原因是宿主机 yuki 默认只监听 `127.0.0.1:9999`，host 网络可以让容器访问这个本地接口，同时不需要把 yuki 暴露到外网。
 
-Add the following line to your crontab (`crontab -e`)
+安装脚本会部署 Web/index 容器并安装宿主机 yuki。启用仓库同步后，yuki 的 post-sync hook 会在容器模式下执行 `docker compose exec index /app/scripts/generate-index.sh`，同步完成后立即刷新首页。
 
-```
-10  *   * * *   /usr/bin/python3 /home/mirror/scripts/mirrors-index/genindex.py -o /srv/www-misc/index.html 2> /dev/null
-```
+常用命令：
 
-It will update every hour at minute 10.
+```bash
+sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
+  -f /opt/njxzu-mirrors-index/deploy/compose.yaml ps
 
-### Alternative Method
-
-Copy all the systemd service files (`mirrors-index.service`, `mirrors-index.timer`,
-`mirrors-index.path`) from `services/` dir into `/etc/systemd/system/`.
-Then enable them and start the timer and the path file.
-
-### Previous Method
-
-The following method is obsolete, because /srv/www only contains symlinks.
-
-Add a following line to incrontab:
-
-```/srv/www IN_CREATE,IN_DELETE,IN_MOVE /home/mirror/newindex/genindex.py```
-
-The crontab file was also used to trigger the update based on time before.
-Use `crontab -l -u mirror` to check the line that has been commented out for now.
-
-### Locales
-
-Install zh_CN locales since the `genisolist.ini` file contains Chinese characters.
-
-## Development
-
-Here we introduce how to develop this project on your personal computer (without polluting host's filesystem environment).
-
-Create a Debian container:
-
-```shell
-# fish shell
-docker run --rm -it -p 8000:8000 -e TZ=Asia/Shanghai -v $(pwd):/workspace ustclug/debian:12
-# bash shell
-docker run --rm -it -p 8000:8000 -e TZ=Asia/Shanghai -v $PWD:/workspace ustclug/debian:12
+sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
+  -f /opt/njxzu-mirrors-index/deploy/compose.yaml logs -f index
 ```
 
-Then `apt update && apt install -y python3 python3-requests python3-jinja2 rsync` to install dependencies.
+## 传统部署
 
-`mkdir /srv/rsync-attrs` to create a fake directory for metadata, and `python3 -m http.server --directory /srv/rsync-attrs &` at `/workspace` to start a HTTP server at port 8000 for host browser access.
+目标系统建议 Debian 12 或 Ubuntu 22.04/24.04。
 
-`python3 genindex.py` to generate the index page. Note that this repo currently does not contain webfont-related files yet.
-
-If you need to debug genisolist, use `z-genisolist/utils/rsync-stub-generator.py` to generate stub files for testing. Example:
-
-```shell
-z-genisolist/utils/rsync-stub-generator.py rsync://rsync.mirrors.ustc.edu.cn/archlinux --dist /srv/rsync-attrs/archlinux
+```bash
+git clone --recursive <this-repo> /tmp/njxzu-mirrors-index
+cd /tmp/njxzu-mirrors-index
+sudo cp deploy/mirror.env.example /etc/njxzu-mirrors.env
+sudo editor /etc/njxzu-mirrors.env
+sudo deploy/quick-deploy.sh
 ```
 
-Also `DEBUG_WITH_REPOLIST=1 python3 genindex.py` can help create folders within `HTTPDIR`/`OUTDIR` without the necessity to create stub files one by one.
+默认路径：
 
-## Copyright
+- 源码目录：`/opt/njxzu-mirrors-index`
+- Web 根目录：`/srv/mirror/www`
+- 环境文件：`/etc/njxzu-mirrors.env`
+- 站点域名：`mirrors.njxzc.edu.cn`
 
-    Copyright © 2013-2024 USTC Linux User Group <lug@ustc.edu.cn>
-    All rights reserved.
+部署后访问 `http://mirrors.njxzc.edu.cn/`。如果还没有 DNS，可以先在本机 `/etc/hosts` 指向服务器 IP。
 
-    This file is part of Mirrors-index.
+## 启用 yuki
 
-    Mirrors-index is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License version 2 as
-    published by the Free Software Foundation.
+首页可以只依赖目录扫描工作；如果需要同步调度和状态页，继续安装 yuki：
 
-    Mirrors-index is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+```bash
+sudo /opt/njxzu-mirrors-index/deploy/setup-yuki.sh
+```
 
-    You should have received a copy of the GNU General Public License
-    along with Mirrors-index.  If not, see <http://www.gnu.org/licenses/>.
+示例仓库配置会安装到 `/etc/yuki/repos/*.yaml.example`，默认不会启用。启用 Alpine 示例：
 
-* * *
-LUG@USTC
+```bash
+sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
+  --name alpine \
+  --host rsync.alpinelinux.org \
+  --path alpine/ \
+  --reload \
+  --sync
+```
+
+yuki 同步完成后会触发首页重新生成。传统部署会启动 `mirrors-index.service`，容器化部署会触发 `index` 容器内的生成脚本。状态页读取 `/status/json`，Nginx 会把它反代到 `http://127.0.0.1:9999/api/v1/metas`。
+
+## 本地开发
+
+```bash
+make init
+make gen
+make serve
+```
+
+然后访问 <http://127.0.0.1:8000/>。`make gen` 会使用 `DEBUG_WITH_REPOLIST=1` 根据 `examples/repolist.txt` 创建测试目录。
+
+## 配置入口
+
+- `config/gencontent.json`：站点文案、链接、域名、帮助链接、yuki 状态接口。
+- `config/genmirrorz.json`：MirrorZ 元数据、endpoint、站点信息。
+- `config/revproxy.json`：反向代理列表。默认空数组。
+- `deploy/mirror.env.example`：生产部署环境变量，可覆盖域名、路径、联系邮箱。
+- `deploy/container.env.example`：容器化部署环境变量。
+- `deploy/compose.yaml`：Web/index 容器编排，yuki 不在该 Compose 内。
+- `deploy/yuki/repos/*.yaml.example`：yuki 仓库同步样例。
+
+## 常用运维命令
+
+```bash
+sudo systemctl status mirrors-index.timer
+sudo systemctl start mirrors-index.service
+sudo journalctl -u mirrors-index.service -n 100
+
+sudo systemctl status yukid
+sudo yukictl repo ls
+sudo yukictl meta ls
+
+sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
+  -f /opt/njxzu-mirrors-index/deploy/compose.yaml ps
+```
+
+## 版权
+
+上游 mirrors-index 代码遵循 GPL-2.0。USTC LUG 原始版权声明见 `LICENSE`。

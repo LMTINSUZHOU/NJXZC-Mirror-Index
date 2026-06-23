@@ -14,11 +14,13 @@ import utils
 Generate HTML Fragment about latest server news.
 """
 
-SERVERNEWS_FEED = "https://servers.ustclug.org/feed/mirrors.xml"
+SERVERNEWS_FEED = ""
 SERVERNEWS_MAX_NUM = 3
 
 
-def getServerNews(glob_logger: logging.Logger = None) -> list:
+def getServerNews(
+    glob_logger: logging.Logger = None, feed: str = None, max_num: int = None
+) -> list:
     """
     return list of NewsRecord object.
 
@@ -26,6 +28,10 @@ def getServerNews(glob_logger: logging.Logger = None) -> list:
     """
 
     logger = glob_logger or logging.getLogger()
+    feed = SERVERNEWS_FEED if feed is None else feed
+    max_num = SERVERNEWS_MAX_NUM if max_num is None else max_num
+    if not feed:
+        return []
 
     def parseFeedData(text):
         """
@@ -49,7 +55,7 @@ def getServerNews(glob_logger: logging.Logger = None) -> list:
         doc = xml.dom.minidom.parseString(text)
         current_num = 0
         for item in doc.getElementsByTagName('entry'):
-            if (current_num >= SERVERNEWS_MAX_NUM):
+            if (current_num >= max_num):
                 break
             if item.getElementsByTagName("category")[0].getAttribute("term") != "mirrors":
                 continue
@@ -59,16 +65,14 @@ def getServerNews(glob_logger: logging.Logger = None) -> list:
     logger.info('begin generation of ServerNews...')
     newslist = []
     try:
-        resp = utils.get_resp_with_timeout(SERVERNEWS_FEED, logger=logger)
+        resp = utils.get_resp_with_timeout(feed, logger=logger)
         if resp is None:
-            # failed
             return newslist
         newslist = list(parseFeedData(resp.text))
-        logger.info('newslist generation successful, size is {}.'.format(len(newslist)))
+        logger.info("newslist generation successful, size is {}.".format(len(newslist)))
     except Exception as e:
         logger.error('unknown exception caught: "{}".'.format(str(e)))
-    finally:
-        return newslist
+    return newslist
 
 
 if __name__ == "__main__":

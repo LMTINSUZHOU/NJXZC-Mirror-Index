@@ -3,23 +3,25 @@
 html{color:#000;background:transparent;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}table{border-collapse:collapse;border-spacing:0}fieldset,img{border:0}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal}li{list-style:none}caption,th{text-align:left}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}q:before,q:after{content:''}abbr,acronym{border:0;font-variant:normal}sup{vertical-align:text-top}sub{vertical-align:text-bottom}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit}input,textarea,select{*font-size:100%}legend{color:#000}
 /*stylesheet here*/
 body{
-    background-color: #FDFFFD;
+    background-color: #FBFCFE;
 }
 #header{
-    width:75%;
-    margin:0 auto;
+    width:100%;
+    min-height:44px;
+    background:#113B5A;
 }
 #headlinks{
-    float:right;
-    margin-right: 10px;
+    max-width:75%;
+    margin:0 auto;
     padding: 10px 0;
+    text-align:right;
 }
 #headlinks li{
-    float:left;
+    display:inline-block;
     margin-left:25px;
     font-family: "Open Sans", "Ubuntu", Helvetica, Arial, Geneva, sans-serif;
     font-size:16px;
-    color:#EEECDF;
+    color:#E9F2F6;
 }
 #headlinks li:hover{
     color:#FFF;
@@ -27,7 +29,7 @@ body{
 #headlinks li a{
     font-family: "Open Sans", "Ubuntu", Helvetica, Arial, Geneva, sans-serif;
     font-size:16px;
-    color:#EEECDF;
+    color:#E9F2F6;
     text-decoration:none;
 }
 #headlinks li a:hover{
@@ -36,13 +38,13 @@ body{
 #welcome{
     /*width: 100%;*/
     padding: 40px 15px 40px 0px;
-    background: #40bd97; /* Old browsers */
-    background: -moz-linear-gradient(top, #40bd97 0%, #07a878 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#40bd97), color-stop(100%,#07a878)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, #40bd97 0%,#07a878 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, #40bd97 0%,#07a878 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, #40bd97 0%,#07a878 100%); /* IE10+ */
-    background: linear-gradient(to bottom, #40bd97 0%,#07a878 100%); /* W3C */
+    background: #165B7A; /* Old browsers */
+    background: -moz-linear-gradient(top, #1F7894 0%, #165B7A 58%, #113B5A 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#1F7894), color-stop(58%,#165B7A), color-stop(100%,#113B5A)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #1F7894 0%,#165B7A 58%,#113B5A 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #1F7894 0%,#165B7A 58%,#113B5A 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #1F7894 0%,#165B7A 58%,#113B5A 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #1F7894 0%,#165B7A 58%,#113B5A 100%); /* W3C */
 }
 #intro{
     margin:0 auto;
@@ -70,12 +72,22 @@ body{
     font-weight:300;
     font-size:18px;
 }
+#brandline{
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+#brandline img{
+    width:72px;
+    height:72px;
+    flex:0 0 auto;
+}
 #wrapper{
     width:75%;
     margin:25px auto;
 }
 #filelist h3{
-    color:#07A878;
+    color:#165B7A;
     font-family: "Open Sans", "Ubuntu", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans Mono CJK SC", "WenQuanYi Zen Hei", "Apple LiGothic Medium", "STXihei", "ST Heiti", "WenQuanYi Zen Hei Sharp", sans-serif;
     font-weight:100;
     font-size:24px;
@@ -117,7 +129,7 @@ thead{
     padding-left:3px;
 }
 #filelist td a{
-    color:#0B486B;
+    color:#123E63;
     text-decoration: none;
 }
 #filelist a:hover{
@@ -154,13 +166,13 @@ thead{
     width:20px;
 }
 tbody tr:hover{
-    background-color:#DDEADD;
+    background-color:#EAF4F6;
 }
 #sidebar div{
     margin-bottom: 25px;
 }
 #sidebar h3{
-    color:#07A878;
+    color:#165B7A;
     font-family: "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans Mono CJK SC", "WenQuanYi Zen Hei", "Apple LiGothic Medium", "STXihei", "ST Heiti", "WenQuanYi Zen Hei Sharp", sans-serif;
     font-weight:300;
     font-size:24px;
@@ -182,7 +194,7 @@ tbody tr:hover{
 }
 .btn{
     display: inline-block;
-    background-color: #07A878;
+    background-color: #165B7A;
     margin:12px auto 12px auto;
     padding:3px 20px;
     line-height: 1.5em;
@@ -199,11 +211,11 @@ tbody tr:hover{
 
 }
 .btn:hover{
-    background-color:#40BD97;
+    background-color:#D89428;
 }
 #footer{
-    background-color: #333;
-    color:#bbb;
+    background-color: #24313A;
+    color:#C6D1D7;
     padding:30px 0;
 }
 #footercontent{
@@ -218,7 +230,7 @@ tbody tr:hover{
     line-height: 1.5em;
 }
 #footerleft a{
-    color:#ccc;
+    color:#E5EEF2;
 }
 #footerright{
     width:33%;
@@ -227,6 +239,10 @@ tbody tr:hover{
 }
 #footerright p{
     margin-top:5px;
+}
+#footerright img{
+    width:120px;
+    max-width:70%;
 }
 .modal
 {
@@ -319,11 +335,19 @@ tbody tr:hover{
    regarded as mobile device
  */
 @media screen and (max-width:540px) {
-    .update, .filetime, #infinity {
+    .update, .filetime {
         display: none;
+    }
+    #brandline img {
+        width:54px;
+        height:54px;
+    }
+    #intro h1 {
+        font-size:34px;
     }
     #intro h2 {
         font-weight: 500;
+        font-size:20px;
     }
     #footerleft, #header {
         width: 100%;

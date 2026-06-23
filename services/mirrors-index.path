@@ -2,9 +2,8 @@
 Description=Mirrors index page update trigger
 
 [Path]
-PathModified=/mnt/array0/pool/
-PathModified=/mnt/array1/pool/
-PathModified=/mnt/array1/exports/
+PathChanged=/srv/mirror/.sync-trigger
+Unit=mirrors-index.service
 
 [Install]
 WantedBy=multi-user.target

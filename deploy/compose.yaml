@@ -1,0 +1,42 @@
+services:
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzc.edu.cn}"
+      YUKI_PROXY_URL: "${YUKI_PROXY_URL:-http://127.0.0.1:9999}"
+    volumes:
+      - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www:ro"
+      - "./nginx.container.conf.template:/etc/nginx/templates/default.conf.template:ro"
+    depends_on:
+      index:
+        condition: service_started
+
+  index:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: njxzu-mirrors-index:latest
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      MIRROR_NAME: "${MIRROR_NAME:-NJXZU}"
+      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzc.edu.cn}"
+      MIRROR_BASE_URL: "${MIRROR_BASE_URL:-https://mirrors.njxzc.edu.cn}"
+      MIRROR_CONTACT_EMAIL: "${MIRROR_CONTACT_EMAIL:-mirror-admin@njxzc.edu.cn}"
+      MIRROR_WEB_ROOT: /srv/mirror/www
+      MIRROR_HTTPDIR: /srv/mirror/www
+      MIRROR_OUTDIR: /srv/mirror/www
+      MIRROR_HELP_URL: "${MIRROR_HELP_URL:-https://help.mirrors.cernet.edu.cn/}"
+      MIRROR_STATUS_URL: "${MIRROR_STATUS_URL:-/status/}"
+      MIRROR_STATUS_JSON_URL: "${MIRROR_STATUS_JSON_URL:-/status/json}"
+      MIRROR_ABOUT_URL: "${MIRROR_ABOUT_URL:-https://www.njxzc.edu.cn/}"
+      MIRROR_NEWS_URL: "${MIRROR_NEWS_URL:-}"
+      MIRROR_NEWS_FEED: "${MIRROR_NEWS_FEED:-}"
+      MIRROR_REQUEST_URL: "${MIRROR_REQUEST_URL:-mailto:mirror-admin@njxzc.edu.cn?subject=New%20mirror%20request}"
+      MIRROR_ISSUE_URL: "${MIRROR_ISSUE_URL:-mailto:mirror-admin@njxzc.edu.cn?subject=Mirror%20issue}"
+      MIRROR_YUKI_URL: "${MIRROR_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
+      MIRROR_INDEX_INTERVAL: "${MIRROR_INDEX_INTERVAL:-600}"
+    volumes:
+      - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www"

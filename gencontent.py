@@ -17,15 +17,15 @@ from utils import CONFIG_FOLDER, get_mirrorz_cname
 with open(CONFIG_FOLDER / "gencontent.json") as f:
     USER_CONFIG: dict = json.load(f)
 
-HTTPDIR = USER_CONFIG.get("httpdir", "/srv/repo")
+HTTPDIR = os.getenv("MIRROR_HTTPDIR") or USER_CONFIG.get("httpdir", "/srv/mirror/www")
 """Where repo files (or rsync-huai metadata files) are stored."""
-OUTDIR = USER_CONFIG.get("outdir", HTTPDIR)
+OUTDIR = os.getenv("MIRROR_OUTDIR") or USER_CONFIG.get("outdir", HTTPDIR)
 """Where generated files will be stored."""
-HELPBASE_SPHI = USER_CONFIG.get("help-sphinx", "https://mirrors.ustc.edu.cn/help/")
+HELPBASE_SPHI = os.getenv("MIRROR_HELP_SPHINX") or USER_CONFIG.get("help-sphinx", "/help/")
 HELPBASE_MIRRORZ = USER_CONFIG.get(
     "help-mirrorz", "https://help.mirrors.cernet.edu.cn/"
 )
-MIRROR_NAME = USER_CONFIG.get("mirror-name", "USTC")
+MIRROR_NAME = os.getenv("MIRROR_NAME") or USER_CONFIG.get("mirror-name", "NJXZU")
 
 EXCLUDE = ("tmpfs", ".*")
 """Directories match these glob will be ignored."""
@@ -35,6 +35,73 @@ MIRRORZ_HELP = USER_CONFIG.get("mirrorz-help", [])
 """Set which repos should use mirrorz-help, if '*' in list then all help links will use mirrorz-help."""
 
 logger = logging.getLogger(__name__)
+
+
+DEFAULT_SITE_CONFIG = {
+    "title": "南京晓庄学院开源软件镜像站",
+    "brand": "NJXZU Mirrors",
+    "hero-title": "NJXZU Mirrors",
+    "hero-subtitle": "南京晓庄学院开源软件镜像站",
+    "hero-description": "为校内外用户提供常用开源软件、Linux 发行版与开发工具镜像服务。",
+    "organization": "南京晓庄学院",
+    "support": "南京晓庄学院信息化建设与管理处",
+    "domain": "mirrors.njxzc.edu.cn",
+    "base-url": "https://mirrors.njxzc.edu.cn",
+    "help-url": "https://help.mirrors.cernet.edu.cn/",
+    "status-url": "/status/",
+    "status-json-url": "/status/json",
+    "about-url": "https://www.njxzc.edu.cn/",
+    "news-url": "",
+    "news-feed": "",
+    "request-url": "mailto:mirror-admin@njxzc.edu.cn?subject=New%20mirror%20request",
+    "issue-url": "mailto:mirror-admin@njxzc.edu.cn?subject=Mirror%20issue",
+    "contact-email": "mirror-admin@njxzc.edu.cn",
+    "source-url": "https://git.lug.ustc.edu.cn/mirrors/mirrors-index",
+    "sync-manager-url": "https://github.com/ustclug/yuki",
+    "sync-images-url": "https://github.com/ustclug/ustcmirror-images",
+    "news-empty": "暂无镜像站新闻。",
+    "footer-note": "本站基于 USTC mirrors-index、Yuki 与 ustcmirror-images 构建。",
+    "links": [],
+    "domains": [],
+}
+
+
+def getSiteConfig() -> dict:
+    site = DEFAULT_SITE_CONFIG.copy()
+    site.update(USER_CONFIG.get("site", {}))
+
+    env_map = {
+        "MIRROR_DOMAIN": "domain",
+        "MIRROR_BASE_URL": "base-url",
+        "MIRROR_CONTACT_EMAIL": "contact-email",
+        "MIRROR_HELP_URL": "help-url",
+        "MIRROR_STATUS_URL": "status-url",
+        "MIRROR_STATUS_JSON_URL": "status-json-url",
+        "MIRROR_ABOUT_URL": "about-url",
+        "MIRROR_NEWS_URL": "news-url",
+        "MIRROR_NEWS_FEED": "news-feed",
+        "MIRROR_REQUEST_URL": "request-url",
+        "MIRROR_ISSUE_URL": "issue-url",
+    }
+    for env_name, key in env_map.items():
+        if os.getenv(env_name):
+            site[key] = os.getenv(env_name)
+
+    return site
+
+
+SITE_CONFIG = getSiteConfig()
+
+if os.getenv("MIRROR_YUKI_URL"):
+    USER_CONFIG["yuki"] = [
+        {
+            "url": os.getenv("MIRROR_YUKI_URL"),
+            "name": "yukid",
+            "priority": 1,
+            "homepage": True,
+            "mirrorz": True,
+        }
+    ]
 
 
 if MIRRORZ_HELP:

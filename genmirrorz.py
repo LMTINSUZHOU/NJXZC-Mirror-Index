@@ -8,6 +8,7 @@ import subprocess
 import sys
 import os
 import logging
+import shutil
 
 from utils import CONFIG_FOLDER, get_mirrorz_cname, get_resp_with_timeout
 from gencontent import USER_CONFIG as gencontent_config
@@ -123,14 +124,32 @@ def parse_repo_with_meta(repolist: list, meta: dict) -> dict:
 
 
 def disk_info(site: dict) -> None:
-    # TODO(portability): This now only works on mirrors4
-    repo_zfs = subprocess.check_output(
-        "zfs get -Hp -o value used,available pool0/repo", shell=True
-    ).decode("utf-8")
-    used, available = repo_zfs.split()
-    used = int(used)
-    available = int(available)
-    site["disk"] = f"{size(used)} / {size(used + available)}"
+    disk_override = os.getenv("MIRRORZ_DISK")
+    if disk_override:
+        site["disk"] = disk_override
+        return
+
+    zfs_dataset = os.getenv("MIRRORZ_ZFS_DATASET") or options.get("zfs-dataset")
+    if zfs_dataset:
+        try:
+            repo_zfs = subprocess.check_output(
+                ["zfs", "get", "-Hp", "-o", "value", "used,available", zfs_dataset],
+                stderr=subprocess.DEVNULL,
+            ).decode("utf-8")
+            used, available = repo_zfs.split()
+            used = int(used)
+            available = int(available)
+            site["disk"] = f"{size(used)} / {size(used + available)}"
+            return
+        except Exception as e:
+            logger.warning(f"failed to read zfs dataset {zfs_dataset}: {e}")
+
+    path = os.getenv("MIRROR_HTTPDIR") or gencontent_config.get("httpdir", "/srv/mirror/www")
+    try:
+        usage = shutil.disk_usage(path)
+        site["disk"] = f"{size(usage.used)} / {size(usage.total)}"
+    except Exception as e:
+        logger.warning(f"failed to read disk usage of {path}: {e}")
 
 
 def getMirrorzJson(repolist, isolist):
@@ -142,7 +161,7 @@ def getMirrorzJson(repolist, isolist):
     mirrorz["info"] = isolist
     mirrorz["mirrors"] = mirrors
 
-    return json.dumps(mirrorz)
+    return json.dumps(mirrorz, ensure_ascii=False)
 
 
 if __name__ == "__main__":
