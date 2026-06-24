@@ -104,7 +104,7 @@ systemctl enable --now docker
 docker compose --env-file "$ENV_FILE" -f "$MIRROR_SRC_DIR/deploy/compose.yaml" up -d --build
 
 cat <<EOF
-Containerized NJXZU Mirrors web/index services are running.
+Containerized NX OpenAtom web/index services are running.
 
 Compose file: $MIRROR_SRC_DIR/deploy/compose.yaml
 Compose env:  $ENV_FILE

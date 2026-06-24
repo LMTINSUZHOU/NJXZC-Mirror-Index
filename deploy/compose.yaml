@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzc.edu.cn}"
+      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
       YUKI_PROXY_URL: "${YUKI_PROXY_URL:-http://127.0.0.1:9999}"
     volumes:
       - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www:ro"
@@ -21,10 +21,17 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      MIRROR_NAME: "${MIRROR_NAME:-NJXZU}"
-      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzc.edu.cn}"
-      MIRROR_BASE_URL: "${MIRROR_BASE_URL:-https://mirrors.njxzc.edu.cn}"
-      MIRROR_CONTACT_EMAIL: "${MIRROR_CONTACT_EMAIL:-mirror-admin@njxzc.edu.cn}"
+      MIRROR_NAME: "${MIRROR_NAME:-NX OpenAtom}"
+      MIRROR_SITE_TITLE: "${MIRROR_SITE_TITLE:-南晓开放原子社开源软件镜像站}"
+      MIRROR_BRAND: "${MIRROR_BRAND:-NX OpenAtom}"
+      MIRROR_HERO_TITLE: "${MIRROR_HERO_TITLE:-NX OpenAtom}"
+      MIRROR_HERO_SUBTITLE: "${MIRROR_HERO_SUBTITLE:-南晓开放原子社开源软件镜像站}"
+      MIRROR_HERO_DESCRIPTION: "${MIRROR_HERO_DESCRIPTION:-为校内外用户提供常用开源软件、Linux 发行版与开发工具镜像服务。}"
+      MIRROR_ORGANIZATION: "${MIRROR_ORGANIZATION:-南晓开放原子社}"
+      MIRROR_SUPPORT: "${MIRROR_SUPPORT:-南晓开放原子社}"
+      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
+      MIRROR_BASE_URL: "${MIRROR_BASE_URL:-https://mirrors.njxzu.cn}"
+      MIRROR_CONTACT_EMAIL: "${MIRROR_CONTACT_EMAIL:-mirror@openatom.njxzu.cn}"
       MIRROR_WEB_ROOT: /srv/mirror/www
       MIRROR_HTTPDIR: /srv/mirror/www
       MIRROR_OUTDIR: /srv/mirror/www
@@ -34,8 +41,8 @@ services:
       MIRROR_ABOUT_URL: "${MIRROR_ABOUT_URL:-https://www.njxzc.edu.cn/}"
       MIRROR_NEWS_URL: "${MIRROR_NEWS_URL:-}"
       MIRROR_NEWS_FEED: "${MIRROR_NEWS_FEED:-}"
-      MIRROR_REQUEST_URL: "${MIRROR_REQUEST_URL:-mailto:mirror-admin@njxzc.edu.cn?subject=New%20mirror%20request}"
-      MIRROR_ISSUE_URL: "${MIRROR_ISSUE_URL:-mailto:mirror-admin@njxzc.edu.cn?subject=Mirror%20issue}"
+      MIRROR_REQUEST_URL: "${MIRROR_REQUEST_URL:-mailto:mirror@openatom.njxzu.cn?subject=New%20mirror%20request}"
+      MIRROR_ISSUE_URL: "${MIRROR_ISSUE_URL:-mailto:mirror@mirror.njxzu.cn?subject=Mirror%20issue}"
       MIRROR_YUKI_URL: "${MIRROR_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
       MIRROR_INDEX_INTERVAL: "${MIRROR_INDEX_INTERVAL:-600}"
     volumes:

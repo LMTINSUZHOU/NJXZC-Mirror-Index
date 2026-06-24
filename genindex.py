@@ -23,7 +23,7 @@ def main():
     )
     parser = argparse.ArgumentParser(
         description="Mirrors index page generator",
-        epilog="Brought to you by NJXZU Mirrors.",
+        epilog="Brought to you by NX OpenAtom.",
     )
     parser.add_argument(
         "-d",

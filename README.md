@@ -1,6 +1,6 @@
-# 南京晓庄学院开源软件镜像站
+# 南晓开放原子社开源软件镜像站
 
-本项目基于 [USTC mirrors-index](https://git.lug.ustc.edu.cn/mirrors/mirrors-index) 定制，用于生成南京晓庄学院开源软件镜像站首页、状态页和 MirrorZ 元数据。同步调度参考 [ustclug/yuki](https://github.com/ustclug/yuki)，同步容器参考 [ustclug/ustcmirror-images](https://github.com/ustclug/ustcmirror-images)，页面体验参考 <https://mirrors.ustc.edu.cn/>。
+本项目基于 [USTC mirrors-index](https://git.lug.ustc.edu.cn/mirrors/mirrors-index) 定制，用于生成南晓开放原子社开源软件镜像站首页、状态页和 MirrorZ 元数据。同步调度参考 [ustclug/yuki](https://github.com/ustclug/yuki)，同步容器参考 [ustclug/ustcmirror-images](https://github.com/ustclug/ustcmirror-images)，页面体验参考 <https://mirrors.ustc.edu.cn/>。
 
 完整安装、rsync 同步配置和运维手册见 [docs/INSTALL_AND_MANUAL.md](docs/INSTALL_AND_MANUAL.md)。
 
@@ -21,8 +21,8 @@
 git clone --recursive <this-repo> /tmp/njxzu-mirrors-index
 cd /tmp/njxzu-mirrors-index
 sudo deploy/install.sh \
-  --domain mirrors.njxzc.edu.cn \
-  --email mirror-admin@njxzc.edu.cn \
+  --domain mirrors.njxzu.cn \
+  --email mirror@openatom.njxzu.cn \
   --web-root /srv/mirror/www
 ```
 
@@ -62,9 +62,9 @@ sudo deploy/quick-deploy.sh
 - 源码目录：`/opt/njxzu-mirrors-index`
 - Web 根目录：`/srv/mirror/www`
 - 环境文件：`/etc/njxzu-mirrors.env`
-- 站点域名：`mirrors.njxzc.edu.cn`
+- 站点域名：`mirrors.njxzu.cn`
 
-部署后访问 `http://mirrors.njxzc.edu.cn/`。如果还没有 DNS，可以先在本机 `/etc/hosts` 指向服务器 IP。
+部署后访问 `http://mirrors.njxzu.cn/`。如果还没有 DNS，可以先在本机 `/etc/hosts` 指向服务器 IP。
 
 ## 启用 yuki
 

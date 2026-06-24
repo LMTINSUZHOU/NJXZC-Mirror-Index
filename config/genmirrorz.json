@@ -6,7 +6,7 @@
             {
                 "label": "njxzu",
                 "public": true,
-                "resolve": "mirrors.njxzc.edu.cn",
+                "resolve": "mirrors.njxzu.cn",
                 "filter": ["V4", "V6", "SSL", "NOSSL"],
                 "range": [
                     "COUNTRY:CN",
@@ -17,7 +17,7 @@
             {
                 "label": "njxzu4",
                 "public": true,
-                "resolve": "ipv4.mirrors.njxzc.edu.cn",
+                "resolve": "ipv4.mirrors.njxzu.cn",
                 "filter": ["V4", "SSL", "NOSSL"],
                 "range": [
                     "COUNTRY:CN",
@@ -27,7 +27,7 @@
             {
                 "label": "njxzu6",
                 "public": true,
-                "resolve": "ipv6.mirrors.njxzc.edu.cn",
+                "resolve": "ipv6.mirrors.njxzu.cn",
                 "filter": ["V6", "SSL", "NOSSL"],
                 "range": [
                     "COUNTRY:CN",
@@ -37,16 +37,16 @@
             }
         ],
         "site": {
-            "url": "https://mirrors.njxzc.edu.cn",
-            "logo": "https://mirrors.njxzc.edu.cn/static/img/njxzu-mirrors.svg",
-            "logo_darkmode": "https://mirrors.njxzc.edu.cn/static/img/njxzu-mirrors.svg",
-            "abbr": "NJXZU",
-            "name": "南京晓庄学院开源软件镜像",
+            "url": "https://mirrors.njxzu.cn",
+            "logo": "https://mirrors.njxzu.cn/static/img/njxzu-mirrors.svg",
+            "logo_darkmode": "https://mirrors.njxzu.cn/static/img/njxzu-mirrors.svg",
+            "abbr": "NX OpenAtom",
+            "name": "南晓开放原子社开源软件镜像",
             "homepage": "https://www.njxzc.edu.cn/",
-            "issue": "mailto:mirror-admin@njxzc.edu.cn",
-            "request": "mailto:mirror-admin@njxzc.edu.cn",
-            "email": "mirror-admin@njxzc.edu.cn",
-            "group": "南京晓庄学院信息化建设与管理处",
+            "issue": "mailto:mirror@mirror.njxzu.cn",
+            "request": "mailto:mirror@openatom.njxzu.cn",
+            "email": "mirror@openatom.njxzu.cn",
+            "group": "南晓开放原子社",
             "big": "/.well-known/mirror-test/1GB.bin"
         }
     }

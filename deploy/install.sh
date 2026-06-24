@@ -3,8 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-DOMAIN="${MIRROR_DOMAIN:-mirrors.njxzc.edu.cn}"
-EMAIL="${MIRROR_CONTACT_EMAIL:-mirror-admin@njxzc.edu.cn}"
+DOMAIN="${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
+EMAIL="${MIRROR_CONTACT_EMAIL:-mirror@openatom.njxzu.cn}"
+ISSUE_URL="${MIRROR_ISSUE_URL:-mailto:mirror@mirror.njxzu.cn?subject=Mirror%20issue}"
 WEB_ROOT="${MIRROR_WEB_ROOT:-/srv/mirror/www}"
 SRC_DIR="${MIRROR_SRC_DIR:-/opt/njxzu-mirrors-index}"
 CONTAINER_ENV="${MIRROR_CONTAINER_ENV_FILE:-/etc/njxzu-mirrors-container.env}"
@@ -16,7 +17,7 @@ usage() {
   cat <<EOF
 Usage: sudo $0 [options]
 
-Install NJXZU Mirrors with web/index in containers and yuki on the host.
+Install NX OpenAtom with web/index in containers and yuki on the host.
 
 Options:
   --domain DOMAIN        Mirror domain. Default: $DOMAIN
@@ -57,13 +58,21 @@ write_env_file() {
   install -d "$(dirname "$path")"
   : > "$path"
   while [[ $# -gt 0 ]]; do
-    printf '%s=%s\n' "$1" "$2" >> "$path"
+    printf '%s=' "$1" >> "$path"
+    printf "'%s'\n" "$(printf '%s' "$2" | sed "s/'/'\\\\''/g")" >> "$path"
     shift 2
   done
 }
 
 write_env_file "$CONTAINER_ENV" \
-  MIRROR_NAME NJXZU \
+  MIRROR_NAME "NX OpenAtom" \
+  MIRROR_SITE_TITLE "南晓开放原子社开源软件镜像站" \
+  MIRROR_BRAND "NX OpenAtom" \
+  MIRROR_HERO_TITLE "NX OpenAtom" \
+  MIRROR_HERO_SUBTITLE "南晓开放原子社开源软件镜像站" \
+  MIRROR_HERO_DESCRIPTION "为校内外用户提供常用开源软件、Linux 发行版与开发工具镜像服务。" \
+  MIRROR_ORGANIZATION "南晓开放原子社" \
+  MIRROR_SUPPORT "南晓开放原子社" \
   MIRROR_DOMAIN "$DOMAIN" \
   MIRROR_BASE_URL "https://$DOMAIN" \
   MIRROR_CONTACT_EMAIL "$EMAIL" \
@@ -75,13 +84,20 @@ write_env_file "$CONTAINER_ENV" \
   MIRROR_NEWS_URL "" \
   MIRROR_NEWS_FEED "" \
   MIRROR_REQUEST_URL "mailto:$EMAIL?subject=New%20mirror%20request" \
-  MIRROR_ISSUE_URL "mailto:$EMAIL?subject=Mirror%20issue" \
+  MIRROR_ISSUE_URL "$ISSUE_URL" \
   YUKI_PROXY_URL "http://127.0.0.1:9999" \
   MIRROR_YUKI_URL "http://127.0.0.1:9999/api/v1/metas" \
   MIRROR_INDEX_INTERVAL "600"
 
 write_env_file "$YUKI_ENV" \
-  MIRROR_NAME NJXZU \
+  MIRROR_NAME "NX OpenAtom" \
+  MIRROR_SITE_TITLE "南晓开放原子社开源软件镜像站" \
+  MIRROR_BRAND "NX OpenAtom" \
+  MIRROR_HERO_TITLE "NX OpenAtom" \
+  MIRROR_HERO_SUBTITLE "南晓开放原子社开源软件镜像站" \
+  MIRROR_HERO_DESCRIPTION "为校内外用户提供常用开源软件、Linux 发行版与开发工具镜像服务。" \
+  MIRROR_ORGANIZATION "南晓开放原子社" \
+  MIRROR_SUPPORT "南晓开放原子社" \
   MIRROR_DOMAIN "$DOMAIN" \
   MIRROR_BASE_URL "https://$DOMAIN" \
   MIRROR_CONTACT_EMAIL "$EMAIL" \
@@ -99,7 +115,7 @@ write_env_file "$YUKI_ENV" \
   MIRROR_NEWS_URL "" \
   MIRROR_NEWS_FEED "" \
   MIRROR_REQUEST_URL "mailto:$EMAIL?subject=New%20mirror%20request" \
-  MIRROR_ISSUE_URL "mailto:$EMAIL?subject=Mirror%20issue" \
+  MIRROR_ISSUE_URL "$ISSUE_URL" \
   YUKI_LISTEN "127.0.0.1:9999" \
   MIRROR_YUKI_URL "http://127.0.0.1:9999/api/v1/metas" \
   YUKI_CONFIG_DIR "/etc/yuki/repos" \

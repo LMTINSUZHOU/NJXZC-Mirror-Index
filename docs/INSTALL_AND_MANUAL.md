@@ -27,7 +27,7 @@
 - root 权限
 - 公网或教育网可访问的服务器
 - 可用磁盘空间按镜像仓库规划，建议单独挂载到 `/srv/mirror`
-- DNS 指向服务器，例如 `mirrors.njxzc.edu.cn`
+- DNS 指向服务器，例如 `mirrors.njxzu.cn`
 
 安装脚本会安装：
 
@@ -51,8 +51,8 @@ cd /tmp/njxzu-mirrors-index
 
 ```bash
 sudo deploy/install.sh \
-  --domain mirrors.njxzc.edu.cn \
-  --email mirror-admin@njxzc.edu.cn \
+  --domain mirrors.njxzu.cn \
+  --email mirror@openatom.njxzu.cn \
   --web-root /srv/mirror/www
 ```
 
@@ -91,8 +91,8 @@ sudo deploy/install.sh --skip-web
 重要变量：
 
 ```ini
-MIRROR_DOMAIN=mirrors.njxzc.edu.cn
-MIRROR_BASE_URL=https://mirrors.njxzc.edu.cn
+MIRROR_DOMAIN=mirrors.njxzu.cn
+MIRROR_BASE_URL=https://mirrors.njxzu.cn
 MIRROR_WEB_ROOT=/srv/mirror/www
 YUKI_PROXY_URL=http://127.0.0.1:9999
 MIRROR_YUKI_URL=http://127.0.0.1:9999/api/v1/metas
@@ -161,7 +161,7 @@ sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
 
 参数解释：
 
-- `--name alpine`：本地仓库名，对应 URL `https://mirrors.njxzc.edu.cn/alpine/`。
+- `--name alpine`：本地仓库名，对应 URL `https://mirrors.njxzu.cn/alpine/`。
 - `--host rsync.alpinelinux.org`：rsync 上游主机。
 - `--path alpine/`：上游 rsync 模块或目录。
 - `--cron "17 */4 * * *"`：每 4 小时第 17 分钟同步一次。
@@ -289,8 +289,8 @@ sudo tail -f /var/log/yuki/alpine/result.log
 状态页：
 
 ```text
-https://mirrors.njxzc.edu.cn/status/
-https://mirrors.njxzc.edu.cn/status/json
+https://mirrors.njxzu.cn/status/
+https://mirrors.njxzu.cn/status/json
 ```
 
 ## 9. 首页刷新

@@ -25,7 +25,7 @@ HELPBASE_SPHI = os.getenv("MIRROR_HELP_SPHINX") or USER_CONFIG.get("help-sphinx"
 HELPBASE_MIRRORZ = USER_CONFIG.get(
     "help-mirrorz", "https://help.mirrors.cernet.edu.cn/"
 )
-MIRROR_NAME = os.getenv("MIRROR_NAME") or USER_CONFIG.get("mirror-name", "NJXZU")
+MIRROR_NAME = os.getenv("MIRROR_NAME") or USER_CONFIG.get("mirror-name", "NX OpenAtom")
 
 EXCLUDE = ("tmpfs", ".*")
 """Directories match these glob will be ignored."""
@@ -38,24 +38,24 @@ logger = logging.getLogger(__name__)
 
 
 DEFAULT_SITE_CONFIG = {
-    "title": "南京晓庄学院开源软件镜像站",
-    "brand": "NJXZU Mirrors",
-    "hero-title": "NJXZU Mirrors",
-    "hero-subtitle": "南京晓庄学院开源软件镜像站",
+    "title": "南晓开放原子社开源软件镜像站",
+    "brand": "NX OpenAtom",
+    "hero-title": "NX OpenAtom",
+    "hero-subtitle": "南晓开放原子社开源软件镜像站",
     "hero-description": "为校内外用户提供常用开源软件、Linux 发行版与开发工具镜像服务。",
-    "organization": "南京晓庄学院",
-    "support": "南京晓庄学院信息化建设与管理处",
-    "domain": "mirrors.njxzc.edu.cn",
-    "base-url": "https://mirrors.njxzc.edu.cn",
+    "organization": "南晓开放原子社",
+    "support": "南晓开放原子社",
+    "domain": "mirrors.njxzu.cn",
+    "base-url": "https://mirrors.njxzu.cn",
     "help-url": "https://help.mirrors.cernet.edu.cn/",
     "status-url": "/status/",
     "status-json-url": "/status/json",
     "about-url": "https://www.njxzc.edu.cn/",
     "news-url": "",
     "news-feed": "",
-    "request-url": "mailto:mirror-admin@njxzc.edu.cn?subject=New%20mirror%20request",
-    "issue-url": "mailto:mirror-admin@njxzc.edu.cn?subject=Mirror%20issue",
-    "contact-email": "mirror-admin@njxzc.edu.cn",
+    "request-url": "mailto:mirror@openatom.njxzu.cn?subject=New%20mirror%20request",
+    "issue-url": "mailto:mirror@mirror.njxzu.cn?subject=Mirror%20issue",
+    "contact-email": "mirror@openatom.njxzu.cn",
     "source-url": "https://git.lug.ustc.edu.cn/mirrors/mirrors-index",
     "sync-manager-url": "https://github.com/ustclug/yuki",
     "sync-images-url": "https://github.com/ustclug/ustcmirror-images",
@@ -70,7 +70,18 @@ def getSiteConfig() -> dict:
     site = DEFAULT_SITE_CONFIG.copy()
     site.update(USER_CONFIG.get("site", {}))
 
+    if os.getenv("MIRROR_NAME"):
+        site["brand"] = os.getenv("MIRROR_NAME")
+        site["hero-title"] = os.getenv("MIRROR_NAME")
+
     env_map = {
+        "MIRROR_SITE_TITLE": "title",
+        "MIRROR_BRAND": "brand",
+        "MIRROR_HERO_TITLE": "hero-title",
+        "MIRROR_HERO_SUBTITLE": "hero-subtitle",
+        "MIRROR_HERO_DESCRIPTION": "hero-description",
+        "MIRROR_ORGANIZATION": "organization",
+        "MIRROR_SUPPORT": "support",
         "MIRROR_DOMAIN": "domain",
         "MIRROR_BASE_URL": "base-url",
         "MIRROR_CONTACT_EMAIL": "contact-email",

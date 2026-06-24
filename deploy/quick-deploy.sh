@@ -25,7 +25,7 @@ MIRROR_WEB_ROOT="${MIRROR_WEB_ROOT:-/srv/mirror/www}"
 MIRROR_SRC_DIR="${MIRROR_SRC_DIR:-/opt/njxzu-mirrors-index}"
 MIRROR_USER="${MIRROR_USER:-mirror}"
 MIRROR_GROUP="${MIRROR_GROUP:-mirror}"
-MIRROR_DOMAIN="${MIRROR_DOMAIN:-mirrors.njxzc.edu.cn}"
+MIRROR_DOMAIN="${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
 YUKI_LISTEN="${YUKI_LISTEN:-127.0.0.1:9999}"
 INSTALL_PACKAGES="${INSTALL_PACKAGES:-1}"
 
@@ -109,7 +109,7 @@ if command -v nginx >/dev/null 2>&1; then
 fi
 
 cat <<EOF
-NJXZU Mirrors index is installed.
+NX OpenAtom index is installed.
 
 Web root:   $MIRROR_WEB_ROOT
 Source:     $MIRROR_SRC_DIR
