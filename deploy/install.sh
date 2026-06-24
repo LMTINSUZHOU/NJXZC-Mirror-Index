@@ -75,6 +75,7 @@ write_env_file "$CONTAINER_ENV" \
   MIRROR_SUPPORT "南晓开放原子社" \
   MIRROR_DOMAIN "$DOMAIN" \
   MIRROR_BASE_URL "https://$DOMAIN" \
+  MIRROR_LOGO_URL "/static/img/nx-openatom-logo.jpg" \
   MIRROR_CONTACT_EMAIL "$EMAIL" \
   MIRROR_WEB_ROOT "$WEB_ROOT" \
   MIRROR_HELP_URL "https://help.mirrors.cernet.edu.cn/" \
@@ -100,6 +101,7 @@ write_env_file "$YUKI_ENV" \
   MIRROR_SUPPORT "南晓开放原子社" \
   MIRROR_DOMAIN "$DOMAIN" \
   MIRROR_BASE_URL "https://$DOMAIN" \
+  MIRROR_LOGO_URL "/static/img/nx-openatom-logo.jpg" \
   MIRROR_CONTACT_EMAIL "$EMAIL" \
   MIRROR_ROOT "$(dirname "$WEB_ROOT")" \
   MIRROR_WEB_ROOT "$WEB_ROOT" \

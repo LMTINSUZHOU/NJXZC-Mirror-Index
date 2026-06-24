@@ -93,6 +93,7 @@ sudo deploy/install.sh --skip-web
 ```ini
 MIRROR_DOMAIN=mirrors.njxzu.cn
 MIRROR_BASE_URL=https://mirrors.njxzu.cn
+MIRROR_LOGO_URL=/static/img/nx-openatom-logo.jpg
 MIRROR_WEB_ROOT=/srv/mirror/www
 YUKI_PROXY_URL=http://127.0.0.1:9999
 MIRROR_YUKI_URL=http://127.0.0.1:9999/api/v1/metas

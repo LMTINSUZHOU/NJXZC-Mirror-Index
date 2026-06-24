@@ -17,8 +17,8 @@
         ],
         "site": {
             "url": "https://mirrors.njxzu.cn",
-            "logo": "https://mirrors.njxzu.cn/static/img/njxzu-mirrors.svg",
-            "logo_darkmode": "https://mirrors.njxzu.cn/static/img/njxzu-mirrors.svg",
+            "logo": "https://mirrors.njxzu.cn/static/img/nx-openatom-logo.jpg",
+            "logo_darkmode": "https://mirrors.njxzu.cn/static/img/nx-openatom-logo.jpg",
             "abbr": "NX OpenAtom",
             "name": "南晓开放原子社开源软件镜像",
             "homepage": "https://www.njxzc.edu.cn/",

@@ -19,6 +19,7 @@
         "support": "南晓开放原子社",
         "domain": "mirrors.njxzu.cn",
         "base-url": "https://mirrors.njxzu.cn",
+        "logo-url": "/static/img/nx-openatom-logo.jpg",
         "help-url": "https://help.mirrors.cernet.edu.cn/",
         "status-url": "/status/",
         "status-json-url": "/status/json",
