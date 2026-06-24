@@ -54,7 +54,7 @@ DEFAULT_SITE_CONFIG = {
     "news-url": "",
     "news-feed": "",
     "request-url": "mailto:mirror@openatom.njxzu.cn?subject=New%20mirror%20request",
-    "issue-url": "mailto:mirror@mirror.njxzu.cn?subject=Mirror%20issue",
+    "issue-url": "mailto:mirror@openatom.njxzu.cn?subject=Mirror%20issue",
     "contact-email": "mirror@openatom.njxzu.cn",
     "source-url": "https://git.lug.ustc.edu.cn/mirrors/mirrors-index",
     "sync-manager-url": "https://github.com/ustclug/yuki",

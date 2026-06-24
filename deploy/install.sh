@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 DOMAIN="${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
 EMAIL="${MIRROR_CONTACT_EMAIL:-mirror@openatom.njxzu.cn}"
-ISSUE_URL="${MIRROR_ISSUE_URL:-mailto:mirror@mirror.njxzu.cn?subject=Mirror%20issue}"
+ISSUE_URL="${MIRROR_ISSUE_URL:-mailto:mirror@openatom.njxzu.cn?subject=Mirror%20issue}"
 WEB_ROOT="${MIRROR_WEB_ROOT:-/srv/mirror/www}"
 SRC_DIR="${MIRROR_SRC_DIR:-/opt/njxzu-mirrors-index}"
 CONTAINER_ENV="${MIRROR_CONTAINER_ENV_FILE:-/etc/njxzu-mirrors-container.env}"
