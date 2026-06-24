@@ -59,42 +59,6 @@ services:
     image: njxzu-mirrors-index:latest
     restart: unless-stopped
     network_mode: host
-    command: ["sh", "-c", "gunicorn --bind \"$${ADMIN_BIND}\" --workers \"$${ADMIN_WORKERS:-2}\" --access-logfile - --error-logfile - admin_app:app"]
-    environment:
-      ADMIN_BIND: "${ADMIN_BIND:-127.0.0.1:18081}"
-      ADMIN_WORKERS: "${ADMIN_WORKERS:-2}"
-      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-change-this-password}"
-      ADMIN_SECRET_KEY: "${ADMIN_SECRET_KEY:-change-this-secret}"
-      ADMIN_ALLOW_CIDRS: "${ADMIN_ALLOW_CIDRS:-127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10}"
-      ADMIN_REPO_DIR: /etc/yuki/repos
-      ADMIN_REPO_DISABLED_DIR: /etc/yuki/repos.disabled
-      ADMIN_EXAMPLE_REPO_DIR: /app/deploy/yuki/repos
-      ADMIN_YUKICTL_BIN: /host/usr/local/bin/yukictl
-      ADMIN_YUKI_URL: "${MIRROR_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
-      ADMIN_GENERATE_INDEX_SCRIPT: /app/scripts/generate-index.sh
-      MIRROR_ENV_FILE: /etc/njxzu-mirrors-container.env
-      MIRROR_NAME: "${MIRROR_NAME:-NX OpenAtom}"
-      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
-      MIRROR_WEB_ROOT: /srv/mirror/www
-      MIRROR_HTTPDIR: /srv/mirror/www
-      MIRROR_OUTDIR: /srv/mirror/www
-      MIRROR_YUKI_URL: "${MIRROR_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
-      YUKI_LOG_DIR: /var/log/yuki
-    volumes:
-      - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www"
-      - "/etc/yuki:/etc/yuki"
-      - "/var/log/yuki:/var/log/yuki"
-      - "/usr/local/bin:/host/usr/local/bin:ro"
-      - "${MIRROR_CONTAINER_ENV_FILE:-/etc/njxzu-mirrors-container.env}:/etc/njxzu-mirrors-container.env:ro"
-
-  admin:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-    image: njxzu-mirrors-index:latest
-    restart: unless-stopped
-    network_mode: host
     command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:${ADMIN_PORT:-8088}", "--access-logfile", "-", "admin_app:create_app()"]
     environment:
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
