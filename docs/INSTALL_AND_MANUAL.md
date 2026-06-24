@@ -8,6 +8,7 @@
 
 - `web`：`nginx:1.27-alpine` 容器，提供 HTTP 静态服务、目录浏览、`/status/json` 反向代理。
 - `index`：本项目 Python 容器，定时生成 `/srv/mirror/www/index.html` 和 `/srv/mirror/www/mirrorz.json`。
+- `admin`：本项目 Python/Flask 容器，提供内部管理页面，通过 `/admin/` 访问。
 - `yukid`：宿主机 systemd 服务，读取 `/etc/yuki/repos/*.yaml`，定时启动 `ustcmirror/*` 同步容器。
 - `ustcmirror/rsync:latest`：由 yuki 按需拉起，用 rsync 同步实际仓库数据。
 - `/srv/mirror/www`：镜像站 Web 根目录，Nginx、index、yuki 共同使用。
@@ -15,6 +16,7 @@
 默认端口：
 
 - HTTP：`80`
+- admin 本机监听：`127.0.0.1:18081`，由 Nginx 反代为 `/admin/`
 - yuki 本机 API：`127.0.0.1:9999`
 
 `deploy/compose.yaml` 使用 `network_mode: host`，所以容器可以访问宿主机的 `127.0.0.1:9999`。不要把 yuki 监听地址改成 `0.0.0.0`，除非你已经做好防火墙和访问控制。
@@ -62,6 +64,7 @@ sudo deploy/install.sh \
 - 写入 `/etc/njxzu-mirrors.env`
 - 安装 Docker 和 Compose 插件
 - 安装 Web/index 容器
+- 安装内部管理页面容器
 - 安装宿主机 yuki
 - 设置 yuki post-sync hook
 - 创建共享 Web 根目录 `/srv/mirror/www`
@@ -98,6 +101,12 @@ MIRROR_WEB_ROOT=/srv/mirror/www
 YUKI_PROXY_URL=http://127.0.0.1:9999
 MIRROR_YUKI_URL=http://127.0.0.1:9999/api/v1/metas
 MIRROR_INDEX_INTERVAL=600
+ADMIN_PROXY_URL=http://127.0.0.1:18081
+ADMIN_BIND=127.0.0.1:18081
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=<change-me>
+ADMIN_SECRET_KEY=<random-secret>
+ADMIN_ALLOW_CIDRS=127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10
 ```
 
 修改环境文件后重启容器：
@@ -141,9 +150,55 @@ sudo journalctl -u yukid -n 100
 ```bash
 curl -I http://127.0.0.1/
 curl http://127.0.0.1/status/json
+curl -I http://127.0.0.1/admin/
 ```
 
-## 6. rsync 同步配置
+## 6. 内部管理页面
+
+访问地址：
+
+```text
+http://mirrors.njxzu.cn/admin/
+```
+
+登录账号来自 `/etc/njxzu-mirrors-container.env`：
+
+```ini
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=...
+ADMIN_SECRET_KEY=...
+```
+
+建议首次部署后立即修改 `ADMIN_PASSWORD` 和 `ADMIN_SECRET_KEY`，然后重启容器：
+
+```bash
+sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
+  -f /opt/njxzu-mirrors-index/deploy/compose.yaml up -d --build
+```
+
+管理页面默认只允许本机和内网地址段访问。若需要限制到学校网段，可以把 `ADMIN_ALLOW_CIDRS` 改为实际网段，例如：
+
+```ini
+ADMIN_ALLOW_CIDRS=127.0.0.1/32,::1/128,10.11.0.0/16
+```
+
+页面支持：
+
+- 刷新首页和 `mirrorz.json`。
+- 查看启用仓库、停用仓库和内置示例。
+- 修改仓库 cron 定时任务。
+- 从示例导入仓库。
+- 启用、停用仓库。
+- 删除仓库配置；勾选“数据”后才会删除 `/srv/mirror/www/<repo>` 这类仓库目录。
+- 触发 yuki reload 和单仓库同步。
+
+注意：
+
+- yuki 当前停用时，页面仍然可以修改 YAML 配置；启用、停用、reload、同步会显示 yuki 不可用提示。
+- 删除默认只删 YAML 配置，不会删仓库数据。
+- 管理页面容器通过挂载 `/etc/yuki` 管理仓库配置，yuki 仍然运行在宿主机。
+
+## 7. rsync 同步配置
 
 镜像仓库同步由 yuki 管理。每个仓库对应一个 YAML 文件，放在 `/etc/yuki/repos/`。
 
@@ -207,7 +262,7 @@ sudo yukictl reload
 sudo yukictl sync debian-security
 ```
 
-## 7. 常用 rsync 示例
+## 8. 常用 rsync 示例
 
 本项目内置了 USTC 上游示例，默认是 `.yaml.example`，不会自动启用。可以先复制到禁用目录，确认清单后再移动到 `/etc/yuki/repos/`：
 
@@ -288,7 +343,7 @@ sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
   --reload
 ```
 
-## 8. 查看同步状态
+## 9. 查看同步状态
 
 列出仓库：
 
@@ -323,7 +378,7 @@ https://mirrors.njxzu.cn/status/
 https://mirrors.njxzu.cn/status/json
 ```
 
-## 9. 首页刷新
+## 10. 首页刷新
 
 index 容器默认每 10 分钟刷新一次首页。yuki 同步完成后也会通过 post-sync hook 立即刷新。
 
@@ -341,7 +396,7 @@ sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
 sudo systemctl start mirrors-index.service
 ```
 
-## 10. 新增仓库流程
+## 11. 新增仓库流程
 
 标准流程：
 
@@ -365,7 +420,7 @@ rsync rsync://rsync.mirrors.ustc.edu.cn/
 rsync --dry-run -avH rsync://rsync.mirrors.ustc.edu.cn/ubuntu-releases/ /tmp/ubuntu-releases-test/
 ```
 
-## 11. 升级
+## 12. 升级
 
 拉取新代码：
 
@@ -388,7 +443,7 @@ sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
 sudo /opt/njxzu-mirrors-index/deploy/setup-yuki.sh
 ```
 
-## 12. 备份
+## 13. 备份
 
 必须备份：
 
@@ -400,7 +455,7 @@ sudo /opt/njxzu-mirrors-index/deploy/setup-yuki.sh
 
 镜像数据 `/srv/mirror/www` 通常很大，可以按磁盘策略快照或重新同步。
 
-## 13. 排障
+## 14. 排障
 
 首页 404 或空白：
 
@@ -438,7 +493,7 @@ sudo tail -n 200 /var/log/yuki/<repo>/result.log
 - 确认 yuki 监听 `127.0.0.1:9999`。
 - 执行 `curl http://127.0.0.1:9999/api/v1/metas`。
 
-## 14. 安全建议
+## 15. 安全建议
 
 - yuki 只监听 `127.0.0.1:9999`。
 - 不对公网开放 Docker API。
@@ -447,7 +502,7 @@ sudo tail -n 200 /var/log/yuki/<repo>/result.log
 - 对大仓库设置合理 `RSYNC_MAXDELETE`。
 - 定期备份 `/etc/yuki/repos/` 和 yuki SQLite 数据库。
 
-## 15. 卸载
+## 16. 卸载
 
 停止容器：
 

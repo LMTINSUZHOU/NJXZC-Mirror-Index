@@ -6,11 +6,14 @@ services:
     environment:
       MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
       YUKI_PROXY_URL: "${YUKI_PROXY_URL:-http://127.0.0.1:9999}"
+      ADMIN_PROXY_URL: "${ADMIN_PROXY_URL:-http://127.0.0.1:18081}"
     volumes:
       - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www:ro"
       - "./nginx.container.conf.template:/etc/nginx/templates/default.conf.template:ro"
     depends_on:
       index:
+        condition: service_started
+      admin:
         condition: service_started
 
   index:
@@ -48,3 +51,80 @@ services:
       MIRROR_INDEX_INTERVAL: "${MIRROR_INDEX_INTERVAL:-600}"
     volumes:
       - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www"
+
+  admin:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: njxzu-mirrors-index:latest
+    restart: unless-stopped
+    network_mode: host
+    command: ["sh", "-c", "gunicorn --bind \"$${ADMIN_BIND}\" --workers \"$${ADMIN_WORKERS:-2}\" --access-logfile - --error-logfile - admin_app:app"]
+    environment:
+      ADMIN_BIND: "${ADMIN_BIND:-127.0.0.1:18081}"
+      ADMIN_WORKERS: "${ADMIN_WORKERS:-2}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-change-this-password}"
+      ADMIN_SECRET_KEY: "${ADMIN_SECRET_KEY:-change-this-secret}"
+      ADMIN_ALLOW_CIDRS: "${ADMIN_ALLOW_CIDRS:-127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10}"
+      ADMIN_REPO_DIR: /etc/yuki/repos
+      ADMIN_REPO_DISABLED_DIR: /etc/yuki/repos.disabled
+      ADMIN_EXAMPLE_REPO_DIR: /app/deploy/yuki/repos
+      ADMIN_YUKICTL_BIN: /host/usr/local/bin/yukictl
+      ADMIN_YUKI_URL: "${MIRROR_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
+      ADMIN_GENERATE_INDEX_SCRIPT: /app/scripts/generate-index.sh
+      MIRROR_ENV_FILE: /etc/njxzu-mirrors-container.env
+      MIRROR_NAME: "${MIRROR_NAME:-NX OpenAtom}"
+      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
+      MIRROR_WEB_ROOT: /srv/mirror/www
+      MIRROR_HTTPDIR: /srv/mirror/www
+      MIRROR_OUTDIR: /srv/mirror/www
+      MIRROR_YUKI_URL: "${MIRROR_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
+      YUKI_LOG_DIR: /var/log/yuki
+    volumes:
+      - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www"
+      - "/etc/yuki:/etc/yuki"
+      - "/var/log/yuki:/var/log/yuki"
+      - "/usr/local/bin:/host/usr/local/bin:ro"
+      - "${MIRROR_CONTAINER_ENV_FILE:-/etc/njxzu-mirrors-container.env}:/etc/njxzu-mirrors-container.env:ro"
+
+  admin:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: njxzu-mirrors-index:latest
+    restart: unless-stopped
+    network_mode: host
+    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:${ADMIN_PORT:-8088}", "--access-logfile", "-", "admin_app:create_app()"]
+    environment:
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-change-this-password}"
+      ADMIN_SECRET_KEY: "${ADMIN_SECRET_KEY:-}"
+      ADMIN_ALLOW_CIDRS: "${ADMIN_ALLOW_CIDRS:-127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10}"
+      ADMIN_REPO_DIR: "${ADMIN_REPO_DIR:-/etc/yuki/repos}"
+      ADMIN_REPO_DISABLED_DIR: "${ADMIN_REPO_DISABLED_DIR:-/etc/yuki/repos.disabled}"
+      ADMIN_EXAMPLE_REPO_DIR: "${ADMIN_EXAMPLE_REPO_DIR:-/app/deploy/yuki/repos}"
+      ADMIN_YUKICTL_BIN: "${ADMIN_YUKICTL_BIN:-/usr/local/bin/yukictl}"
+      ADMIN_YUKI_URL: "${ADMIN_YUKI_URL:-http://127.0.0.1:9999/api/v1/metas}"
+      ADMIN_PORT: "${ADMIN_PORT:-8088}"
+      ADMIN_GENERATE_INDEX_SCRIPT: "${ADMIN_GENERATE_INDEX_SCRIPT:-/app/scripts/generate-index.sh}"
+      ADMIN_GENERATE_TIMEOUT: "${ADMIN_GENERATE_TIMEOUT:-300}"
+      MIRROR_NAME: "${MIRROR_NAME:-NX OpenAtom}"
+      MIRROR_DOMAIN: "${MIRROR_DOMAIN:-mirrors.njxzu.cn}"
+      MIRROR_WEB_ROOT: "${MIRROR_WEB_ROOT:-/srv/mirror/www}"
+      MIRROR_ENV_FILE: "${MIRROR_ENV_FILE:-/etc/njxzu-mirrors-container.env}"
+      YUKI_LOG_DIR: "${YUKI_LOG_DIR:-/var/log/yuki}"
+    volumes:
+      # Reuse the host-mounted mirror root so the index container can keep
+      # writing index.html, and so admin can read the same repo configs.
+      - "${MIRROR_WEB_ROOT:-/srv/mirror/www}:/srv/mirror/www"
+      # yuki repo configs live on the host; bind them in read-write.
+      - "${ADMIN_REPO_DIR:-/etc/yuki/repos}:/etc/yuki/repos"
+      - "${ADMIN_REPO_DISABLED_DIR:-/etc/yuki/repos.disabled}:/etc/yuki/repos.disabled"
+      - "${YUKI_LOG_DIR:-/var/log/yuki}:/var/log/yuki:ro"
+      # yukictl binary and the env file that yuki itself reads.
+      - /usr/local/bin/yukictl:/usr/local/bin/yukictl:ro
+      - "${MIRROR_ENV_FILE:-/etc/njxzu-mirrors-container.env}:/etc/njxzu-mirrors-container.env:ro"
+    depends_on:
+      index:
+        condition: service_started

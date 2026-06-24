@@ -1,0 +1,249 @@
+{% extends "admin_base.html" %}
+
+{% block title %}{{ brand }} 内部管理{% endblock %}
+
+{% macro csrf_field() -%}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}
+
+{% macro repo_status(repo) -%}
+  {% if repo.parse_error %}
+    <span class="badge badge-danger">配置错误</span>
+  {% elif repo.syncing %}
+    <span class="badge badge-info">同步中</span>
+  {% elif repo.exit_code is not none and repo.exit_code not in [0, 25] %}
+    <span class="badge badge-danger">失败 {{ repo.exit_code }}</span>
+  {% elif repo.exit_code is not none %}
+    <span class="badge badge-good">正常</span>
+  {% else %}
+    <span class="badge">未知</span>
+  {% endif %}
+{%- endmacro %}
+
+{% macro repo_table(repos, state) -%}
+  {% if repos %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>仓库</th>
+            <th>定时任务</th>
+            <th>上游</th>
+            <th>容量</th>
+            <th>上次成功</th>
+            <th>下次运行</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for repo in repos %}
+            <tr>
+              <td>
+                <strong>{{ repo.name }}</strong>
+                <span class="path-text">{{ repo.storage_dir or repo.path }}</span>
+                {% if repo.parse_error %}<span class="error-text">{{ repo.parse_error }}</span>{% endif %}
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('update_repo_cron', name=repo.name) }}" class="inline-form cron-form">
+                  {{ csrf_field() }}
+                  <input type="hidden" name="state" value="{{ state }}">
+                  <input class="cron-input" name="cron" value="{{ repo.cron }}" aria-label="{{ repo.name }} cron">
+                  <button class="icon-button" title="保存定时任务" type="submit">保存</button>
+                </form>
+              </td>
+              <td>
+                <span>{{ repo.upstream or repo.rsync_host or "-" }}</span>
+                {% if repo.rsync_path %}<span class="path-text">{{ repo.rsync_path }}</span>{% endif %}
+              </td>
+              <td>{{ repo.size|filesize }}</td>
+              <td>{{ repo.last_success|ts_local }}</td>
+              <td>{{ repo.next_run|ts_local }}</td>
+              <td>{{ repo_status(repo) }}</td>
+              <td>
+                <div class="action-row">
+                  {% if state == "enabled" %}
+                    <form method="post" action="{{ url_for('sync_repo', name=repo.name) }}">
+                      {{ csrf_field() }}
+                      <button class="button button-small" type="submit">同步</button>
+                    </form>
+                    <form method="post" action="{{ url_for('disable_repo', name=repo.name) }}">
+                      {{ csrf_field() }}
+                      <button class="button button-small" type="submit">停用</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{{ url_for('enable_repo', name=repo.name) }}">
+                      {{ csrf_field() }}
+                      <button class="button button-small button-primary" type="submit">启用</button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="{{ url_for('delete_repo', name=repo.name) }}" onsubmit="return confirm('确认删除 {{ repo.name }} 的配置？');">
+                    {{ csrf_field() }}
+                    <input type="hidden" name="state" value="{{ state }}">
+                    <label class="check-label"><input type="checkbox" name="delete_data" value="1">数据</label>
+                    <button class="button button-small button-danger" type="submit">删除</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">暂无仓库。</p>
+  {% endif %}
+{%- endmacro %}
+
+{% block body %}
+<header class="topbar">
+  <div>
+    <p class="eyebrow">Mirror Admin</p>
+    <h1>{{ brand }} 内部管理</h1>
+    <p class="muted">{{ domain }}</p>
+  </div>
+  <nav class="top-actions">
+    <a class="button" href="/" target="_blank" rel="noreferrer">首页</a>
+    <a class="button" href="/status/" target="_blank" rel="noreferrer">状态页</a>
+    <form method="post" action="{{ url_for('logout') }}">
+      {{ csrf_field() }}
+      <button class="button" type="submit">退出</button>
+    </form>
+  </nav>
+</header>
+
+<main class="layout">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <section class="flash-list">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% endwith %}
+
+  <section id="overview" class="overview-grid">
+    <article class="metric">
+      <span>启用仓库</span>
+      <strong>{{ stats.enabled_count }}</strong>
+    </article>
+    <article class="metric">
+      <span>停用仓库</span>
+      <strong>{{ stats.disabled_count }}</strong>
+    </article>
+    <article class="metric">
+      <span>可导入示例</span>
+      <strong>{{ stats.example_count }}</strong>
+    </article>
+    <article class="metric">
+      <span>可用空间</span>
+      <strong>{{ stats.disk_free|filesize }}</strong>
+      <small>总计 {{ stats.disk_total|filesize }}</small>
+    </article>
+    <article class="metric">
+      <span>首页更新</span>
+      <strong class="small-strong">{{ stats.index_mtime|ts_local }}</strong>
+    </article>
+  </section>
+
+  {% if stats.default_password %}
+    <section class="notice notice-danger">
+      管理密码仍是默认值，请在 <code>{{ stats.env_file }}</code> 中设置 <code>ADMIN_PASSWORD</code> 和 <code>ADMIN_SECRET_KEY</code>。
+    </section>
+  {% endif %}
+  {% if yuki_error %}
+    <section class="notice">
+      yuki 状态接口暂时不可用：{{ yuki_error }}
+    </section>
+  {% endif %}
+  {% if not yuki_bin_exists %}
+    <section class="notice">
+      未找到 yukictl，启用、停用、同步后的 yuki 重载会失败。请确认宿主机已安装 yuki。
+    </section>
+  {% endif %}
+
+  <section class="toolbar">
+    <form method="post" action="{{ url_for('refresh_index') }}">
+      {{ csrf_field() }}
+      <button class="button button-primary" type="submit">刷新首页</button>
+    </form>
+    <form method="post" action="{{ url_for('reload_yuki') }}">
+      {{ csrf_field() }}
+      <button class="button" type="submit">重载 yuki</button>
+    </form>
+    <span class="path-text">Web 根目录：{{ stats.web_root }}</span>
+  </section>
+
+  <section id="enabled" class="section-block">
+    <div class="section-heading">
+      <h2>启用仓库</h2>
+      <p>这些 YAML 位于 {{ stats.repo_dir }}，会被 yuki 调度。</p>
+    </div>
+    {{ repo_table(enabled_repos, "enabled") }}
+  </section>
+
+  <section id="disabled" class="section-block">
+    <div class="section-heading">
+      <h2>停用仓库</h2>
+      <p>这些 YAML 位于 {{ stats.repo_disabled_dir }}，不会被 yuki 调度。</p>
+    </div>
+    {{ repo_table(disabled_repos, "disabled") }}
+  </section>
+
+  <section id="examples" class="section-block">
+    <div class="section-heading">
+      <h2>示例仓库</h2>
+      <p>从项目内置模板导入，建议先导入为停用状态，确认 cron 后再启用。</p>
+    </div>
+    {% if example_repos %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>仓库</th>
+              <th>默认定时任务</th>
+              <th>上游</th>
+              <th>镜像容器</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for repo in example_repos %}
+              <tr>
+                <td><strong>{{ repo.name }}</strong></td>
+                <td>{{ repo.cron }}</td>
+                <td>
+                  <span>{{ repo.upstream or repo.rsync_host or "-" }}</span>
+                  {% if repo.rsync_path %}<span class="path-text">{{ repo.rsync_path }}</span>{% endif %}
+                </td>
+                <td>{{ repo.image or "-" }}</td>
+                <td>
+                  {% if repo.exists_elsewhere %}
+                    <span class="badge">已存在</span>
+                  {% else %}
+                    <div class="action-row">
+                      <form method="post" action="{{ url_for('import_example', name=repo.name) }}">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="target" value="disabled">
+                        <button class="button button-small" type="submit">导入停用</button>
+                      </form>
+                      <form method="post" action="{{ url_for('import_example', name=repo.name) }}">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="target" value="enabled">
+                        <button class="button button-small button-primary" type="submit">导入启用</button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty">暂无示例仓库。</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

@@ -16,6 +16,67 @@ if [[ ! -f "$ENV_FILE" ]]; then
   echo "Created $ENV_FILE. Continuing with defaults; edit it later if needed."
 fi
 
+random_hex() {
+  local bytes="$1"
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex "$bytes"
+  else
+    od -An -N "$bytes" -tx1 /dev/urandom | tr -d ' \n'
+  fi
+}
+
+env_quote() {
+  printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+}
+
+set_env_line() {
+  local key="$1"
+  local value="$2"
+  local line
+  line="${key}=$(env_quote "$value")"
+  if grep -q "^${key}=" "$ENV_FILE"; then
+    sed -i.bak "s#^${key}=.*#${line}#" "$ENV_FILE"
+  else
+    printf '%s\n' "$line" >> "$ENV_FILE"
+  fi
+}
+
+ensure_env_line() {
+  local key="$1"
+  local value="$2"
+  if ! grep -q "^${key}=" "$ENV_FILE"; then
+    set_env_line "$key" "$value"
+  fi
+}
+
+ensure_env_secret() {
+  local key="$1"
+  local value="$2"
+  local placeholder="$3"
+  local current=""
+  if grep -q "^${key}=" "$ENV_FILE"; then
+    current="$(grep -m1 "^${key}=" "$ENV_FILE" | cut -d= -f2-)"
+    current="${current%\'}"
+    current="${current#\'}"
+    current="${current%\"}"
+    current="${current#\"}"
+    if [[ "$current" == "$placeholder" || -z "$current" ]]; then
+      set_env_line "$key" "$value"
+    fi
+  else
+    set_env_line "$key" "$value"
+  fi
+}
+
+ensure_env_line "MIRROR_CONTAINER_ENV_FILE" "$ENV_FILE"
+ensure_env_line "ADMIN_PROXY_URL" "http://127.0.0.1:18081"
+ensure_env_line "ADMIN_BIND" "127.0.0.1:18081"
+ensure_env_line "ADMIN_WORKERS" "2"
+ensure_env_line "ADMIN_USERNAME" "admin"
+ensure_env_secret "ADMIN_PASSWORD" "$(random_hex 12)" "change-this-password"
+ensure_env_secret "ADMIN_SECRET_KEY" "$(random_hex 32)" "change-this-secret"
+ensure_env_line "ADMIN_ALLOW_CIDRS" "127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10"
+
 set -a
 # shellcheck disable=SC1090
 source "$ENV_FILE"

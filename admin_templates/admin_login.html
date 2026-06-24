@@ -1,0 +1,37 @@
+{% extends "admin_base.html" %}
+
+{% block title %}{{ brand }} 内部管理{% endblock %}
+
+{% block body %}
+<main class="login-shell">
+  <section class="login-panel">
+    <div>
+      <p class="eyebrow">Mirror Admin</p>
+      <h1>{{ brand }} 内部管理</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-list">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" class="login-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>
+        <span>用户名</span>
+        <input name="username" autocomplete="username" required autofocus>
+      </label>
+      <label>
+        <span>密码</span>
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="button button-primary" type="submit">登录</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

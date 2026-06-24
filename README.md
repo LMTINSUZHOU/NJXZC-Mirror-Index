@@ -7,9 +7,10 @@
 ## 组件
 
 - `mirrors-index`：扫描镜像目录，生成 `index.html`、`mirrorz.json`、`/status/` 静态页面。
+- `admin`：内部管理页面，提供仓库启停、定时任务修改、删除配置、导入示例和刷新首页。
 - `yuki`：可选的镜像同步调度器，提供 `/api/v1/metas` 状态 JSON。
 - `ustcmirror-images`：可选的同步容器集合，例如 `ustcmirror/rsync:latest`、`ustcmirror/apt-sync:latest`。
-- `nginx`：对外提供静态文件、仓库目录浏览，并把 `/status/json` 反代到 yuki。
+- `nginx`：对外提供静态文件、仓库目录浏览，并把 `/status/json` 反代到 yuki，把 `/admin/` 反代到管理页面。
 
 ## 容器化部署
 
@@ -30,6 +31,7 @@ sudo deploy/install.sh \
 
 - `web`：官方 `nginx:1.27-alpine`，读取 `/srv/mirror/www` 并对外监听 80。
 - `index`：本项目构建的 Python 镜像，默认每 10 分钟生成一次 `index.html` 和 `mirrorz.json`。
+- `admin`：本项目构建的 Python/Flask 管理页面，默认只监听宿主机 `127.0.0.1:18081`，由 nginx 暴露为 `/admin/`。
 
 `deploy/compose.yaml` 默认使用 `network_mode: host`。原因是宿主机 yuki 默认只监听 `127.0.0.1:9999`，host 网络可以让容器访问这个本地接口，同时不需要把 yuki 暴露到外网。
 
@@ -44,6 +46,15 @@ sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
 sudo docker compose --env-file /etc/njxzu-mirrors-container.env \
   -f /opt/njxzu-mirrors-index/deploy/compose.yaml logs -f index
 ```
+
+内部管理页面：
+
+- 地址：`http://mirrors.njxzu.cn/admin/`
+- 配置文件：`/etc/njxzu-mirrors-container.env`
+- 默认用户：`ADMIN_USERNAME`
+- 默认密码：`ADMIN_PASSWORD`
+
+管理页面默认只允许本机、校园/内网地址段访问。需要调整访问范围时修改 `ADMIN_ALLOW_CIDRS` 后重启容器。
 
 ## 传统部署
 
