@@ -1,5 +1,5 @@
 upstream mirror_admin {
-    server 127.0.0.1:${ADMIN_PORT:-8088};
+    server 127.0.0.1:${ADMIN_PORT};
 }
 
 server {
