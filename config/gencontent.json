@@ -44,21 +44,6 @@
                 "label": "mirrors.njxzu.cn",
                 "url": "//mirrors.njxzu.cn/",
                 "desc": "自动解析"
-            },
-            {
-                "label": "ipv4.mirrors.njxzu.cn",
-                "url": "//ipv4.mirrors.njxzu.cn/",
-                "desc": "IPv4 线路"
-            },
-            {
-                "label": "ipv6.mirrors.njxzu.cn",
-                "url": "//ipv6.mirrors.njxzu.cn/",
-                "desc": "IPv6 线路"
-            },
-            {
-                "label": "rsync.mirrors.njxzu.cn",
-                "url": "//rsync.mirrors.njxzu.cn/",
-                "desc": "Rsync 线路"
             }
         ]
     }

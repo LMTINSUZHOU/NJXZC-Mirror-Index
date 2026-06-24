@@ -13,27 +13,6 @@
                     "REGION:JS",
                     "ISP:CERNET"
                 ]
-            },
-            {
-                "label": "njxzu4",
-                "public": true,
-                "resolve": "ipv4.mirrors.njxzu.cn",
-                "filter": ["V4", "SSL", "NOSSL"],
-                "range": [
-                    "COUNTRY:CN",
-                    "REGION:JS"
-                ]
-            },
-            {
-                "label": "njxzu6",
-                "public": true,
-                "resolve": "ipv6.mirrors.njxzu.cn",
-                "filter": ["V6", "SSL", "NOSSL"],
-                "range": [
-                    "COUNTRY:CN",
-                    "REGION:JS",
-                    "ISP:CERNET"
-                ]
             }
         ],
         "site": {
