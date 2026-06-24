@@ -194,6 +194,17 @@ code {
   border-color: #fecdd3;
 }
 
+.notice-info {
+  color: #0f4c81;
+  background: #f0f7ff;
+  border-color: #c7dcf5;
+}
+
+.notice-info strong {
+  color: #0c3d68;
+  margin-right: 4px;
+}
+
 .toolbar {
   margin-top: 14px;
   padding: 12px;

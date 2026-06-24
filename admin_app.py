@@ -392,8 +392,10 @@ def fetch_yuki_meta(yuki_url: str) -> tuple[dict[str, dict[str, Any]], str | Non
             for item in payload
             if isinstance(item, dict) and item.get("name")
         }, None
+    except requests.exceptions.ConnectionError:
+        return {}, "yuki 当前未运行（连不上 127.0.0.1:9999）。管理页仍可改 YAML，但 yuki 实时状态、重载与同步会被跳过。"
     except requests.RequestException as exc:
-        return {}, str(exc)
+        return {}, f"无法访问 yuki 状态接口：{exc}"
 
 
 def load_repo_records(directory: Path, state: str, meta_map: dict[str, dict[str, Any]]) -> list[RepoRecord]:

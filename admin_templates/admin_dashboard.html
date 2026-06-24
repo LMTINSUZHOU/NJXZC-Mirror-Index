@@ -153,13 +153,13 @@
     </section>
   {% endif %}
   {% if yuki_error %}
-    <section class="notice">
-      yuki 状态接口暂时不可用：{{ yuki_error }}
+    <section class="notice notice-info">
+      <strong>Yuki 状态不可用：</strong>{{ yuki_error }} 启用、停用、cron 修改仍会写入配置，yuki 重新启动后会自动加载。
     </section>
   {% endif %}
   {% if not yuki_bin_exists %}
     <section class="notice">
-      未找到 yukictl，启用、停用、同步后的 yuki 重载会失败。请确认宿主机已安装 yuki。
+      未找到 yukictl（默认路径 <code>/usr/local/bin/yukictl</code>），启用、停用、同步后的 yuki 重载会失败。请在宿主机运行 <code>deploy/setup-yuki.sh</code>。
     </section>
   {% endif %}
 
