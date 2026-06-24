@@ -1,0 +1,13 @@
+name: msys2
+description: MSYS2 and MinGW-w64 packages for Windows C/C++ development.
+cron: "33 2 * * *"
+storageDir: /srv/mirror/www/msys2
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: mirrors.tuna.tsinghua.edu.cn
+  RSYNC_PATH: msys2/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "50000"
+  $UPSTREAM: rsync://mirrors.tuna.tsinghua.edu.cn/msys2/

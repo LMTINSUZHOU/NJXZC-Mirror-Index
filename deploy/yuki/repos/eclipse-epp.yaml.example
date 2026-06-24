@@ -1,0 +1,13 @@
+name: eclipse-epp
+description: Eclipse IDE packaged downloads from Eclipse EPP releases.
+cron: "23 2 * * *"
+storageDir: /srv/mirror/www/eclipse-epp
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: mirrors.tuna.tsinghua.edu.cn
+  RSYNC_PATH: eclipse/technology/epp/downloads/release/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "50000"
+  $UPSTREAM: rsync://mirrors.tuna.tsinghua.edu.cn/eclipse/technology/epp/downloads/release/

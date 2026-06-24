@@ -35,6 +35,7 @@ class RepoRecord:
     name: str
     state: str
     path: Path
+    description: str = ""
     cron: str = ""
     storage_dir: str = ""
     image: str = ""
@@ -317,9 +318,11 @@ def create_app(config_overrides: dict[str, Any] | None = None) -> Flask:
                 flash(f"仓库 {repo_name} 已存在，无需重复导入。", "warning")
                 return redirect(url_for("dashboard", _anchor=anchor_for_state(state)))
 
+        config = load_repo_config(source)
         target = repo_path_for_state(app, repo_name, target_state, must_exist=False)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+        create_storage_dir_if_safe(app, config.get("storageDir"))
 
         if target_state == "enabled":
             code, detail = run_yukictl(app, "reload")
@@ -426,6 +429,7 @@ def load_repo_record(path: Path, state: str, meta_map: dict[str, dict[str, Any]]
         envs = config.get("envs") or {}
         meta = meta_map.get(name, {})
         repo.cron = str(config.get("cron", ""))
+        repo.description = str(config.get("description", ""))
         repo.storage_dir = str(config.get("storageDir", ""))
         repo.image = str(config.get("image", ""))
         repo.upstream = str(envs.get("$UPSTREAM") or envs.get("UPSTREAM") or meta.get("upstream") or "")
@@ -513,6 +517,22 @@ def delete_storage_dir_if_safe(app: Flask, storage_dir: Path) -> bool:
     if not resolved.exists():
         return False
     shutil.rmtree(resolved)
+    return True
+
+
+def create_storage_dir_if_safe(app: Flask, storage_dir: Any) -> bool:
+    if not storage_dir:
+        return False
+    try:
+        resolved = Path(str(storage_dir)).resolve(strict=False)
+        web_root = app.config["MIRROR_WEB_ROOT"].resolve(strict=False)
+    except OSError:
+        return False
+    if resolved == web_root:
+        return False
+    if web_root not in resolved.parents:
+        return False
+    resolved.mkdir(parents=True, exist_ok=True)
     return True
 
 

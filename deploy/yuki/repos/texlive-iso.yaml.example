@@ -1,0 +1,13 @@
+name: texlive-iso
+description: TeX Live ISO images for Windows and Linux installers.
+cron: "13 2 * * *"
+storageDir: /srv/mirror/www/texlive-iso
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: mirrors.tuna.tsinghua.edu.cn
+  RSYNC_PATH: CTAN/systems/texlive/Images/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "200"
+  $UPSTREAM: rsync://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/

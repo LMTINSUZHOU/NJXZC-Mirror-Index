@@ -41,6 +41,7 @@
             <tr>
               <td>
                 <strong>{{ repo.name }}</strong>
+                {% if repo.description %}<span class="path-text">{{ repo.description }}</span>{% endif %}
                 <span class="path-text">{{ repo.storage_dir or repo.path }}</span>
                 {% if repo.parse_error %}<span class="error-text">{{ repo.parse_error }}</span>{% endif %}
               </td>
@@ -211,7 +212,10 @@
           <tbody>
             {% for repo in example_repos %}
               <tr>
-                <td><strong>{{ repo.name }}</strong></td>
+                <td>
+                  <strong>{{ repo.name }}</strong>
+                  {% if repo.description %}<span class="path-text">{{ repo.description }}</span>{% endif %}
+                </td>
                 <td>{{ repo.cron }}</td>
                 <td>
                   <span>{{ repo.upstream or repo.rsync_host or "-" }}</span>

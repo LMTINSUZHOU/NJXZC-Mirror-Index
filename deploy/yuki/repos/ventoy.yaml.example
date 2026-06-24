@@ -1,0 +1,16 @@
+name: ventoy
+description: Ventoy release assets from GitHub Releases.
+cron: "53 2 * * *"
+storageDir: /srv/mirror/www/github-release/ventoy
+image: ustcmirror/github-release:latest
+logRotCycle: 5
+retry: 1
+envs:
+  UPSTREAM_URL: https://api.github.com/repos/ventoy/
+  REPOS: |
+    - repo: Ventoy
+      versions: 5
+      prerelease: false
+      tarball: false
+  WORKERS: "4"
+  $UPSTREAM: https://github.com/ventoy/Ventoy/releases

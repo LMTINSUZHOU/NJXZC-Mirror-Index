@@ -85,7 +85,7 @@ sudo deploy/quick-deploy.sh
 sudo /opt/njxzu-mirrors-index/deploy/setup-yuki.sh
 ```
 
-示例仓库配置会安装到 `/etc/yuki/repos/*.yaml.example`，默认不会启用。USTC 上游同步请遵守 <https://mirrors.ustc.edu.cn/help/rsync-guide.html>：使用 `rsync.mirrors.ustc.edu.cn`，不要使用 HTTP/HTTPS 大规模抓取，不要使用 `-c/--checksum`，普通仓库每日一次，Ubuntu 等热门仓库最高每 6 小时一次。
+示例仓库配置会安装到 `/etc/yuki/repos/*.yaml.example`，默认不会启用。内置示例包含 Ubuntu、Debian、Node.js、LLVM、TeX Live ISO、Eclipse IDE、MSYS2/MinGW、OBS Studio 和 Ventoy。USTC 上游同步请遵守 <https://mirrors.ustc.edu.cn/help/rsync-guide.html>：使用 `rsync.mirrors.ustc.edu.cn`，不要使用 HTTP/HTTPS 大规模抓取，不要使用 `-c/--checksum`，普通仓库每日一次，Ubuntu 等热门仓库最高每 6 小时一次。
 
 启用 Ubuntu releases 示例：
 

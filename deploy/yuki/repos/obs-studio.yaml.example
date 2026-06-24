@@ -1,0 +1,16 @@
+name: obs-studio
+description: OBS Studio release assets from GitHub Releases.
+cron: "43 2 * * *"
+storageDir: /srv/mirror/www/github-release/obsproject
+image: ustcmirror/github-release:latest
+logRotCycle: 5
+retry: 1
+envs:
+  UPSTREAM_URL: https://api.github.com/repos/obsproject/
+  REPOS: |
+    - repo: obs-studio
+      versions: 3
+      prerelease: false
+      tarball: false
+  WORKERS: "4"
+  $UPSTREAM: https://github.com/obsproject/obs-studio/releases

@@ -262,13 +262,13 @@ sudo yukictl reload
 sudo yukictl sync debian-security
 ```
 
-## 8. 常用 rsync 示例
+## 8. 常用同步示例
 
-本项目内置了 USTC 上游示例，默认是 `.yaml.example`，不会自动启用。可以先复制到禁用目录，确认清单后再移动到 `/etc/yuki/repos/`：
+本项目内置了常用同步示例，默认是 `.yaml.example`，不会自动启用。可以先复制到禁用目录，确认清单后再移动到 `/etc/yuki/repos/`：
 
 ```bash
 sudo mkdir -p /etc/yuki/repos.disabled
-sudo cp /opt/njxzu-mirrors-index/deploy/yuki/repos/{ubuntu,ubuntu-releases,debian,debian-cd,debian-security,nodejs-release,llvm-apt}.yaml.example /etc/yuki/repos.disabled/
+sudo cp /opt/njxzu-mirrors-index/deploy/yuki/repos/{ubuntu,ubuntu-releases,debian,debian-cd,debian-security,nodejs-release,llvm-apt,texlive-iso,eclipse-epp,msys2,obs-studio,ventoy}.yaml.example /etc/yuki/repos.disabled/
 ```
 
 一期推荐清单：
@@ -282,8 +282,19 @@ sudo cp /opt/njxzu-mirrors-index/deploy/yuki/repos/{ubuntu,ubuntu-releases,debia
 | `debian-security` | Debian 安全更新 | 每日一次 | 约 220 GiB |
 | `nodejs-release` | Node.js 官方发布包 | 每日一次 | 约 480 GiB |
 | `llvm-apt` | Clang/LLVM APT 源 | 每日一次 | 约 85 GiB |
+| `texlive-iso` | TeX Live ISO 安装镜像，含 Windows/Linux 安装介质 | 每日一次 | 约 7 GiB |
+| `eclipse-epp` | Eclipse IDE 打包发布目录 | 每日一次 | 随 release 变化 |
+| `msys2` | MSYS2 与 MinGW-w64 软件包 | 每日一次 | 随上游增长 |
+| `obs-studio` | OBS Studio GitHub Release 资产 | 每日一次 | 保留最近 3 个 release |
+| `ventoy` | Ventoy GitHub Release 资产 | 每日一次 | 保留最近 5 个 release |
 
 Ubuntu APT 与 Debian APT 不建议用普通 rsync 只同步发行版目录，因为 `pool/` 是共享目录，简单裁剪可能导致 `Packages` 引用缺文件。若要严格只保留 Ubuntu 20.04+、Debian 10+，需要改用 APT 专用镜像工具做 suite/architecture 闭包同步；普通 rsync 示例按 USTC 模块完整同步。
+
+软件类补充说明：
+
+- `texlive-iso`、`eclipse-epp`、`msys2` 使用 TUNA 已验证可访问的 rsync 上游。若未来切换到 USTC，仍要使用 `rsync.mirrors.ustc.edu.cn` 并遵守 USTC rsync 频率限制。
+- `obs-studio`、`ventoy` 使用 `ustcmirror/github-release:latest`，通过 GitHub API 下载 release 资产，不属于 USTC rsync 同步。若遇到 GitHub API 速率限制，可以在 YAML 的 `envs` 中加入 `GITHUB_TOKEN`。
+- 暂未加入 7-Zip；当前没有确认到适合 yuki 直接维护的稳定 rsync 示例。
 
 启用 Ubuntu releases：
 
