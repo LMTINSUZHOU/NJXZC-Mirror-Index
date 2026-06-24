@@ -55,10 +55,19 @@ server {
         add_header Cache-Control "public";
     }
 
+    location = /status/ {
+        # Direct hit on the status landing path should render the page,
+        # not list a directory.
+        try_files /status/status.html =404;
+    }
+
     location /status/ {
+        # Files inside /status/ (status.html, etc.) are served directly;
+        # any other path under /status/ falls back to a directory index so
+        # operators can still browse cached logs.
         autoindex on;
         autoindex_exact_size off;
-        try_files $uri $uri/ =404;
+        try_files $uri =404;
     }
 
     location / {
