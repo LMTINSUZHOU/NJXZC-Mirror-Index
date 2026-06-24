@@ -1,0 +1,12 @@
+name: debian
+cron: "27 3 * * *"
+storageDir: /srv/mirror/www/debian
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: rsync.mirrors.ustc.edu.cn
+  RSYNC_PATH: debian/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "100000"
+  $UPSTREAM: rsync://rsync.mirrors.ustc.edu.cn/debian/

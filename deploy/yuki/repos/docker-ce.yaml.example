@@ -1,5 +1,5 @@
 name: docker-ce
-cron: "27 */4 * * *"
+cron: "27 4 * * *"
 storageDir: /srv/mirror/www/docker-ce
 image: ustcmirror/rsync:latest
 logRotCycle: 5

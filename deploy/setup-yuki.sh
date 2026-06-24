@@ -116,8 +116,8 @@ Repo configs:  $YUKI_CONFIG_DIR
 Status JSON:   http://$YUKI_LISTEN/api/v1/metas
 
 Enable a sample repo:
-  sudo cp $YUKI_CONFIG_DIR/alpine.yaml.example $YUKI_CONFIG_DIR/alpine.yaml
-  sudo install -d -o $MIRROR_USER -g $MIRROR_GROUP $MIRROR_WEB_ROOT/alpine
+  sudo cp $YUKI_CONFIG_DIR/ubuntu-releases.yaml.example $YUKI_CONFIG_DIR/ubuntu-releases.yaml
+  sudo install -d -o $MIRROR_USER -g $MIRROR_GROUP $MIRROR_WEB_ROOT/ubuntu-releases
   sudo yukictl reload
-  sudo yukictl sync alpine
+  sudo yukictl sync ubuntu-releases
 EOF

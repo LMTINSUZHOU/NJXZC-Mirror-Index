@@ -1,12 +1,12 @@
 name: alpine
-cron: "17 */4 * * *"
+cron: "17 3 * * *"
 storageDir: /srv/mirror/www/alpine
 image: ustcmirror/rsync:latest
 logRotCycle: 5
 retry: 1
 envs:
-  RSYNC_HOST: rsync.alpinelinux.org
+  RSYNC_HOST: rsync.mirrors.ustc.edu.cn
   RSYNC_PATH: alpine/
   RSYNC_MAXDELETE: "20000"
   RSYNC_EXCLUDE: --exclude=.~tmp~/
-  $UPSTREAM: rsync://rsync.alpinelinux.org/alpine/
+  $UPSTREAM: rsync://rsync.mirrors.ustc.edu.cn/alpine/

@@ -147,73 +147,90 @@ curl http://127.0.0.1/status/json
 
 镜像仓库同步由 yuki 管理。每个仓库对应一个 YAML 文件，放在 `/etc/yuki/repos/`。
 
-推荐使用脚本创建 rsync 仓库：
+使用 USTC 上游时必须遵守 [科大源同步方法与注意事项](https://mirrors.ustc.edu.cn/help/rsync-guide.html)：
+
+- 只使用 `rsync.mirrors.ustc.edu.cn`，不要用 `mirrors.ustc.edu.cn` 做 rsync。
+- 不要用 HTTP/HTTPS 大规模同步仓库内容。
+- 同步参数必须能增量同步，使用 `-a`，或至少 `-rlt`。`ustcmirror/rsync:latest` 默认命令满足这个要求。
+- 不要使用 `-c` / `--checksum`。
+- 普通仓库不超过每天一次；`ubuntu`、`ubuntu-releases` 等热门仓库最高每 6 小时一次。
+- 单 IP 并发连接不要超过 5。多个仓库的 cron 要错开。
+
+推荐使用脚本创建 rsync 仓库。脚本会拒绝 USTC 主站域名、`-c/--checksum`，并对 USTC 仓库的同步频率做保守校验：
 
 ```bash
 sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
-  --name alpine \
-  --host rsync.alpinelinux.org \
-  --path alpine/ \
-  --cron "17 */4 * * *" \
-  --max-delete 20000 \
-  --reload \
-  --sync
+  --name debian-security \
+  --host rsync.mirrors.ustc.edu.cn \
+  --path debian-security/ \
+  --cron "47 3 * * *" \
+  --max-delete 50000 \
+  --reload
 ```
 
 参数解释：
 
-- `--name alpine`：本地仓库名，对应 URL `https://mirrors.njxzu.cn/alpine/`。
-- `--host rsync.alpinelinux.org`：rsync 上游主机。
-- `--path alpine/`：上游 rsync 模块或目录。
-- `--cron "17 */4 * * *"`：每 4 小时第 17 分钟同步一次。
-- `--max-delete 20000`：单次最多删除 20000 个文件，防止上游异常导致大规模误删。
+- `--name debian-security`：本地仓库名，对应 URL `https://mirrors.njxzu.cn/debian-security/`。
+- `--host rsync.mirrors.ustc.edu.cn`：USTC rsync 专用主机。
+- `--path debian-security/`：上游 rsync 模块或目录。
+- `--cron "47 3 * * *"`：每天 03:47 同步一次。
+- `--max-delete 50000`：单次最多删除 50000 个文件，防止上游异常导致大规模误删。
 - `--reload`：写入配置后执行 `yukictl reload`。
 - `--sync`：立即执行一次同步。
 
 脚本会生成：
 
 ```yaml
-name: 'alpine'
-cron: '17 */4 * * *'
-storageDir: '/srv/mirror/www/alpine'
+name: 'debian-security'
+cron: '47 3 * * *'
+storageDir: '/srv/mirror/www/debian-security'
 image: 'ustcmirror/rsync:latest'
 logRotCycle: 5
 retry: 1
 envs:
-  RSYNC_HOST: 'rsync.alpinelinux.org'
-  RSYNC_PATH: 'alpine/'
-  RSYNC_MAXDELETE: '20000'
+  RSYNC_HOST: 'rsync.mirrors.ustc.edu.cn'
+  RSYNC_PATH: 'debian-security/'
+  RSYNC_MAXDELETE: '50000'
   RSYNC_BW: '0'
   RSYNC_EXCLUDE: '--exclude=.~tmp~/'
   RSYNC_NO_DELETE: 'false'
   RSYNC_SSL: 'false'
-  $UPSTREAM: 'rsync://rsync.alpinelinux.org/alpine/'
+  $UPSTREAM: 'rsync://rsync.mirrors.ustc.edu.cn/debian-security/'
 ```
 
 手动写配置也可以：
 
 ```bash
-sudo editor /etc/yuki/repos/alpine.yaml
-sudo install -d -o mirror -g mirror /srv/mirror/www/alpine
+sudo editor /etc/yuki/repos/debian-security.yaml
+sudo install -d -o mirror -g mirror /srv/mirror/www/debian-security
 sudo yukictl reload
-sudo yukictl sync alpine
+sudo yukictl sync debian-security
 ```
 
 ## 7. 常用 rsync 示例
 
-同步 Alpine：
+本项目内置了 USTC 上游示例，默认是 `.yaml.example`，不会自动启用。可以先复制到禁用目录，确认清单后再移动到 `/etc/yuki/repos/`：
 
 ```bash
-sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
-  --name alpine \
-  --host rsync.alpinelinux.org \
-  --path alpine/ \
-  --cron "17 */4 * * *" \
-  --max-delete 20000 \
-  --reload --sync
+sudo mkdir -p /etc/yuki/repos.disabled
+sudo cp /opt/njxzu-mirrors-index/deploy/yuki/repos/{ubuntu,ubuntu-releases,debian,debian-cd,debian-security,nodejs-release,llvm-apt}.yaml.example /etc/yuki/repos.disabled/
 ```
 
-从 USTC 上游同步 Ubuntu releases：
+一期推荐清单：
+
+| 仓库 | 用途 | 频率 | 估算体量 |
+|---|---|---:|---:|
+| `ubuntu` | Ubuntu APT 源 | 6 小时一次 | 约 4.5 TiB |
+| `ubuntu-releases` | Ubuntu 安装镜像 | 6 小时一次 | 约 55 GiB |
+| `debian` | Debian APT 源 | 每日一次 | 约 2.5 TiB |
+| `debian-cd` | Debian 安装镜像 | 每日一次 | 约 236 GiB |
+| `debian-security` | Debian 安全更新 | 每日一次 | 约 220 GiB |
+| `nodejs-release` | Node.js 官方发布包 | 每日一次 | 约 480 GiB |
+| `llvm-apt` | Clang/LLVM APT 源 | 每日一次 | 约 85 GiB |
+
+Ubuntu APT 与 Debian APT 不建议用普通 rsync 只同步发行版目录，因为 `pool/` 是共享目录，简单裁剪可能导致 `Packages` 引用缺文件。若要严格只保留 Ubuntu 20.04+、Debian 10+，需要改用 APT 专用镜像工具做 suite/architecture 闭包同步；普通 rsync 示例按 USTC 模块完整同步。
+
+启用 Ubuntu releases：
 
 ```bash
 sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
@@ -222,6 +239,18 @@ sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
   --path ubuntu-releases/ \
   --cron "37 */6 * * *" \
   --max-delete 10000 \
+  --reload
+```
+
+启用 Debian security：
+
+```bash
+sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
+  --name debian-security \
+  --host rsync.mirrors.ustc.edu.cn \
+  --path debian-security/ \
+  --cron "47 3 * * *" \
+  --max-delete 50000 \
   --reload
 ```
 
@@ -271,20 +300,20 @@ sudo yukictl repo ls
 
 ```bash
 sudo yukictl meta ls
-sudo yukictl meta ls alpine
+sudo yukictl meta ls ubuntu-releases
 ```
 
 手动同步：
 
 ```bash
-sudo yukictl sync alpine
+sudo yukictl sync ubuntu-releases
 ```
 
 查看日志：
 
 ```bash
-sudo ls -la /var/log/yuki/alpine
-sudo tail -f /var/log/yuki/alpine/result.log
+sudo ls -la /var/log/yuki/ubuntu-releases
+sudo tail -f /var/log/yuki/ubuntu-releases/result.log
 ```
 
 状态页：
@@ -327,14 +356,13 @@ sudo systemctl start mirrors-index.service
 查看上游 rsync 模块：
 
 ```bash
-rsync rsync://rsync.alpinelinux.org/
 rsync rsync://rsync.mirrors.ustc.edu.cn/
 ```
 
 试探单个目录：
 
 ```bash
-rsync --dry-run -av rsync://rsync.alpinelinux.org/alpine/ /tmp/alpine-test/
+rsync --dry-run -avH rsync://rsync.mirrors.ustc.edu.cn/ubuntu-releases/ /tmp/ubuntu-releases-test/
 ```
 
 ## 11. 升级

@@ -74,15 +74,17 @@ sudo deploy/quick-deploy.sh
 sudo /opt/njxzu-mirrors-index/deploy/setup-yuki.sh
 ```
 
-示例仓库配置会安装到 `/etc/yuki/repos/*.yaml.example`，默认不会启用。启用 Alpine 示例：
+示例仓库配置会安装到 `/etc/yuki/repos/*.yaml.example`，默认不会启用。USTC 上游同步请遵守 <https://mirrors.ustc.edu.cn/help/rsync-guide.html>：使用 `rsync.mirrors.ustc.edu.cn`，不要使用 HTTP/HTTPS 大规模抓取，不要使用 `-c/--checksum`，普通仓库每日一次，Ubuntu 等热门仓库最高每 6 小时一次。
+
+启用 Ubuntu releases 示例：
 
 ```bash
 sudo /opt/njxzu-mirrors-index/deploy/add-rsync-repo.sh \
-  --name alpine \
-  --host rsync.alpinelinux.org \
-  --path alpine/ \
-  --reload \
-  --sync
+  --name ubuntu-releases \
+  --host rsync.mirrors.ustc.edu.cn \
+  --path ubuntu-releases/ \
+  --cron "37 */6 * * *" \
+  --reload
 ```
 
 yuki 同步完成后会触发首页重新生成。传统部署会启动 `mirrors-index.service`，容器化部署会触发 `index` 容器内的生成脚本。状态页读取 `/status/json`，Nginx 会把它反代到 `http://127.0.0.1:9999/api/v1/metas`。

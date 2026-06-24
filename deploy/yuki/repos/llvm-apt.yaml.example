@@ -1,0 +1,12 @@
+name: llvm-apt
+cron: "37 4 * * *"
+storageDir: /srv/mirror/www/llvm-apt
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: rsync.mirrors.ustc.edu.cn
+  RSYNC_PATH: llvm-apt/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "50000"
+  $UPSTREAM: rsync://rsync.mirrors.ustc.edu.cn/llvm-apt/

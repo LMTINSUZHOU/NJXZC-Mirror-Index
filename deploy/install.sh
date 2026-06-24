@@ -148,5 +148,5 @@ Container env: $CONTAINER_ENV
 Yuki env:      $YUKI_ENV
 
 Add an rsync repository:
-  sudo $SRC_DIR/deploy/add-rsync-repo.sh --name alpine --host rsync.alpinelinux.org --path alpine/ --reload --sync
+  sudo $SRC_DIR/deploy/add-rsync-repo.sh --name ubuntu-releases --host rsync.mirrors.ustc.edu.cn --path ubuntu-releases/ --cron "37 */6 * * *" --reload
 EOF

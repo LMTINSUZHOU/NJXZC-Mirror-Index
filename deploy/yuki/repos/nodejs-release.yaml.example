@@ -1,0 +1,12 @@
+name: nodejs-release
+cron: "07 4 * * *"
+storageDir: /srv/mirror/www/nodejs-release
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: rsync.mirrors.ustc.edu.cn
+  RSYNC_PATH: nodejs-release/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "50000"
+  $UPSTREAM: rsync://rsync.mirrors.ustc.edu.cn/nodejs-release/

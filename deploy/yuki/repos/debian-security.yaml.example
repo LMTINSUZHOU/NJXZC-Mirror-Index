@@ -1,0 +1,12 @@
+name: debian-security
+cron: "47 3 * * *"
+storageDir: /srv/mirror/www/debian-security
+image: ustcmirror/rsync:latest
+logRotCycle: 5
+retry: 1
+envs:
+  RSYNC_HOST: rsync.mirrors.ustc.edu.cn
+  RSYNC_PATH: debian-security/
+  RSYNC_EXCLUDE: --exclude=.~tmp~/
+  RSYNC_MAXDELETE: "50000"
+  $UPSTREAM: rsync://rsync.mirrors.ustc.edu.cn/debian-security/

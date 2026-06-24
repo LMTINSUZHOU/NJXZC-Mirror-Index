@@ -12,7 +12,7 @@ fi
 NAME=""
 RSYNC_HOST=""
 RSYNC_PATH=""
-CRON="17 */4 * * *"
+CRON="17 3 * * *"
 STORAGE_DIR=""
 CONFIG_DIR="${YUKI_CONFIG_DIR:-/etc/yuki/repos}"
 WEB_ROOT="${MIRROR_WEB_ROOT:-/srv/mirror/www}"
@@ -42,7 +42,7 @@ Create a yuki repository config that syncs through ustcmirror/rsync.
 
 Required:
   --name NAME             Local repo name, also the URL path by default.
-  --host HOST             Rsync host, e.g. rsync.alpinelinux.org.
+  --host HOST             Rsync host, e.g. rsync.mirrors.ustc.edu.cn.
   --path PATH             Rsync module/path, e.g. alpine/.
 
 Options:
@@ -105,6 +105,117 @@ fi
 STORAGE_DIR="${STORAGE_DIR:-$WEB_ROOT/$NAME}"
 UPSTREAM="${UPSTREAM:-rsync://$RSYNC_HOST/$RSYNC_PATH}"
 CONFIG_FILE="$CONFIG_DIR/$NAME.yaml"
+
+is_ustc_host() {
+  [[ "$RSYNC_HOST" == "rsync.mirrors.ustc.edu.cn" || "$RSYNC_HOST" == *".ustc.edu.cn" ]]
+}
+
+is_ustc_hot_repo() {
+  [[ "$NAME" == ubuntu* || "$RSYNC_PATH" == ubuntu* ]]
+}
+
+reject_checksum_extra() {
+  [[ "$EXTRA" =~ (^|[[:space:]])--checksum($|[[:space:]]) ]] && return 0
+  [[ "$EXTRA" =~ (^|[[:space:]])-[A-Za-z]*c[A-Za-z]*($|[[:space:]]) ]] && return 0
+  return 1
+}
+
+validate_ustc_hot_hour_list() {
+  local raw="$1"
+  local IFS=','
+  local values=($raw)
+  local sorted prev first current gap
+  local -a normalized=()
+
+  if (( ${#values[@]} == 0 || ${#values[@]} > 4 )); then
+    return 1
+  fi
+
+  for current in "${values[@]}"; do
+    [[ "$current" =~ ^[0-9]+$ ]] || return 1
+    (( current >= 0 && current <= 23 )) || return 1
+    normalized+=("$current")
+  done
+
+  sorted="$(printf '%s\n' "${normalized[@]}" | sort -n | uniq)"
+  normalized=()
+  while IFS= read -r current; do
+    [[ -n "$current" ]] && normalized+=("$current")
+  done <<< "$sorted"
+
+  if (( ${#normalized[@]} != ${#values[@]} )); then
+    return 1
+  fi
+
+  first="${normalized[0]}"
+  prev="$first"
+  for ((i = 1; i < ${#normalized[@]}; i++)); do
+    current="${normalized[i]}"
+    gap=$(( current - prev ))
+    (( gap >= 6 )) || return 1
+    prev="$current"
+  done
+
+  gap=$(( 24 + first - prev ))
+  (( gap >= 6 )) || return 1
+  return 0
+}
+
+validate_ustc_cron() {
+  local minute hour dom month dow
+  read -r minute hour dom month dow <<< "$CRON"
+
+  if [[ -z "${dow:-}" ]]; then
+    echo "Invalid cron expression: $CRON" >&2
+    exit 2
+  fi
+
+  if [[ ! "$minute" =~ ^[0-9]+$ ]]; then
+    echo "Use a fixed minute for USTC sync jobs; got: $CRON" >&2
+    exit 2
+  fi
+
+  if [[ "$hour" =~ ^[0-9]+$ ]]; then
+    return
+  fi
+
+  if is_ustc_hot_repo; then
+    if [[ "$hour" =~ ^\*/([0-9]+)$ ]]; then
+      local step="${BASH_REMATCH[1]}"
+      if (( step >= 6 )); then
+        return
+      fi
+    fi
+
+    if validate_ustc_hot_hour_list "$hour"; then
+      return
+    fi
+
+    echo "USTC allows ubuntu-like hot repos at most once every 6 hours; use a cron like '37 */6 * * *'." >&2
+    exit 2
+  fi
+
+  echo "USTC recommends non-ubuntu repos sync no more than once per day; use a cron like '17 3 * * *'." >&2
+  exit 2
+}
+
+if [[ "$RSYNC_HOST" == "mirrors.ustc.edu.cn" ]]; then
+  echo "Use USTC rsync-only host: rsync.mirrors.ustc.edu.cn" >&2
+  exit 2
+fi
+
+if is_ustc_host; then
+  if [[ "$RSYNC_HOST" != "rsync.mirrors.ustc.edu.cn" ]]; then
+    echo "Use USTC rsync-only host: rsync.mirrors.ustc.edu.cn" >&2
+    exit 2
+  fi
+  validate_ustc_cron
+fi
+
+if reject_checksum_extra; then
+  echo "Do not use -c/--checksum with rsync; USTC explicitly forbids checksum mode for mirror sync." >&2
+  exit 2
+fi
 
 yaml_quote() {
   local value="$1"
